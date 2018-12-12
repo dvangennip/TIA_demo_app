@@ -52,14 +52,30 @@ a img {
 
 body {
 	background: #000000 url(assets/landscape_background.png);
-	color: #909090;
+	color: #a0a0a0;
 	font-family: "Georgia", serif;
 	font-size: 100%;
 	line-height: 1.4;
+	height: 1200px;  /* Huge dimentions for the data arena screen */
+	width: 10080px;
 }
 
 @media screen and (min-width: 3000px) {
 	body {
-		overflow: hidden;
+		overflow: hidden;  /* the overflow is hidden to prevent a scrollbar in the view */
 	}
+}
+
+.alien-shock {
+	background: #555;
+	position: absolute;
+	height: 300px;
+	width: 300px;
+	z-index: 1;
+	top: 550px;
+	left: 300px;
+}
+
+.alien-shock.shocking {
+	background: #55f;
 }
