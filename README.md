@@ -8,7 +8,7 @@ This demo was part of a small project into the use of tangible objects in a coll
 **TBD link to some video evidence later on?**
 
 ## Credits
-The project was funded by **TBD**.
+The project was funded by a UTS Data Arena Research Exhibit Grant 2017 for the creation and implementation of a tangible user interface in the UTS Data Arena (a 360-degree screen). This grant was awarded to Elise van den Hoven and Roberto Martinez-Maldonado.
 **TBD mention those involved**
 **TBD acknowledge input from everyone**
 

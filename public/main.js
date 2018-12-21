@@ -4,6 +4,51 @@ const version = '0.0.1';
 
 // ----------------------------------------------------------------------------
 
+function updateMessages(xhr, status, args) 
+{
+	//  data format: tracker1-tracker2-trackerN-...
+	//  per tracker: 1,action,x,close_to_screen,area_code
+	//      example: 1,a,7583,0,2
+	let d = args.data;
+	let td = d.split('-');
+	for (var i = td.length - 1; i >= 0; i--) {
+		td[i] = td[i].split(',')
+
+		switch (td[i]) {
+			case '1':
+				// TODO send relevant event based on state
+				break;
+			case '2':
+				// TODO send relevant event based on state
+				break;
+			case '3':
+				// TODO send relevant event based on state
+				break;
+			case '4':
+				// TODO send relevant event based on state
+				break;
+			case '5':
+				// TODO send relevant event based on state
+				break;
+			case '6':
+				// TODO send relevant event based on state
+				break;
+			case '7':
+				// TODO send relevant event based on state
+				break;
+			case '8':
+				// TODO send relevant event based on state
+				break;
+			default: // do nothing
+				break;
+		}
+	}
+	
+	console.log(args.data);
+}
+
+// ----------------------------------------------------------------------------
+
 /**
  * Extends Element to ease working with classes (based on EnyoJS v1)
  */
@@ -61,7 +106,10 @@ class MainLogic {
 
 		// initiate all situations
 		//this.environment = new Environment();
-		this.sAlienShock = new SituationAlienShock();
+		this.sShip        = new Situation('ship_wreck');
+		this.sAlienShock  = new Situation('alien_shock');
+		this.sAlienBreath = new Situation('alien_breath');
+		this.sGuide       = new Situation('hitch_guide');
 		
 		// initiate all tools
 		// TODO
@@ -94,58 +142,11 @@ class TrackerConnector {
 	}
 
 	update () {
-		// read data from server?
+		// read and parse data from server?
 
 		// send out updated position events for each tracker
 		let tracker1Event = new CustomEvent('tracker1update', {detail: {x: 0, y: 0, z: 0}});
 		window.dispatchEvent(tracker1Event);
-	}
-}
-
-class Position {
-	/**
-	 * @x  : x coordinate in meters
-	 * @y  : y coordinate in meters
-	 * @z  : z coordinate in meters (+z is up)
-	 * @rx : rotation around x-axis
-	 * @ry : rotation around y-axis
-	 * @rz : rotation around z-axis
-	 * @m  : magnitude (m/s)
-	 * @t  : timestamp of position
-	 */
-	constructor (x,y,z,rx,ry,rz,m,t) {
-		this.x = (x) ? x : 0;
-		this.y = (y) ? y : 0;
-		this.z = (z) ? z : 0;
-		this.rx = (rx) ? rx : 0;
-		this.ry = (ry) ? ry : 0;
-		this.rz = (rz) ? rz : 0;
-		this.m = (m) ? m : 0;
-		this.t = (t) ? t : (new Date()).getTime();
-
-		// use event listeners to get position updates?
-	}
-
-	/**
-	 * @t: timestamp of new position
-	 */
-	update_pos (x,y,z, t) {
-		// also update magnitude of change
-		let dt = t - this.t;
-		let ds = Math.sqrt(Math.pow(x - this.x,2) + Math.pow(y - this.y,2) + Math.pow(z - this.z,2))
-		this.m = ds / (dt/1000); // divided by 1000 to convert millis to seconds
-
-		// TODO also update direction of change
-		// calculate angle between two vectors
-		// cos theta = dot product of v1*v2 / (length of v1 * length of v2)
-		// ds is the length of v2, so only v1 left to calculate
-		// let thisVectorLength = Math.sqrt(Math.pow(this.x,2) + Math.pow(this.y,2) + Math.pow(this.z,2))
-		// let theta = Math.acos( (this.x * x) + (this.y * y) + (this.z * z) / (thisVectorLength * ds) )
-
-		// finally, update position to new data
-		this.x = x;
-		this.y = y;
-		this.z = z;
 	}
 }
 
@@ -167,20 +168,41 @@ class Environment {
 }
 
 class Situation {
-	constructor () {
-		// define position onscreen
+	constructor (inName) {
+		// define onscreen element
+		this.el = Element.make('div', {
+			'class': inName.replace('_','-'), // just following convention of using - instead of _
+			'id': inName,
+			'innerHTML': inName
+		})
+		document.getElementsByTagName('body')[0].appendChild(this.el);
+
+		// setup event listeners
+		this.el.addEventListener('mouseover', this.update.bind(this), false);
+		this.el.addEventListener('mouseout', this.update.bind(this), false);
 	}
 
 	/**
 	 * Update state of the simulation
 	 */
-	update () {
+	update (inEvent) {
 		// respond to any new action events?
+		//console.log(inEvent);
+		this.state = (inEvent.type === 'mouseover') ? 'active' : 'default';
+		
+		this.el.addRemoveClass('active', this.state === 'active');
+
+		// switch (this.state) {
+		// 	case 'active':
+		// 		break;
+		// 	default:
+		// 		break;
+		// }
 	}
 
 	playSound (name) {
 		// TODO create the necessary element before playing, only when necessary
-		
+
 		switch (name) {
 			case 'gurgle-weak':
 				break;
@@ -200,30 +222,11 @@ class SituationAlienShock extends Situation {
 	constructor () {
 		super();
 
-		// define position onscreen
-		this.el = Element.make('div', {
-			'class': 'alien-shock',
-			'id': 'alien_shock'
-		})
-		document.getElementsByTagName('body')[0].appendChild(this.el);
-
-		// setup event listeners
-		this.el.addEventListener('mouseover', this.update.bind(this), false);
-		this.el.addEventListener('mouseout', this.update.bind(this), false);
+		
 	}
 
 	update (inEvent) {
-		console.log(inEvent);
-		this.state = (inEvent.type === 'mouseover') ? 'shocking' : 'default';
 		
-		this.el.addRemoveClass('shocking', this.state === 'shocking');
-
-		// switch (this.state) {
-		// 	case 'shocking':
-		// 		break;
-		// 	default:
-		// 		break;
-		// }
 	}
 }
 
@@ -260,6 +263,17 @@ class Tool {
  */
 var initialise = function () {
 	var main = new MainLogic ();
+
+	// define nextMessage function if it's not defined yet to avoid undefined function errors
+	if (typeof nextMessage !== 'function') {
+		console.log('WARNING: no nextMessage function exists');
+		window.nextMessage = function () {
+			console.log('call to nextMessage dummy function');
+		}
+	}
+
+	// from now on, call for updates
+	setInterval(nextMessage, 5000); // update every x ms 
 }
 
 /**

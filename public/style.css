@@ -1,6 +1,3 @@
-@import url('http://fonts.googleapis.com/css?family=Droid+Sans:400,700|Droid+Serif');
-/* @import must come first - Webfonts via Google */
-
 /* =Reset default browser CSS. Based on work by Eric Meyer: http://meyerweb.com/eric/tools/css/reset/index.html
 -------------------------------------------------------------- */
 
@@ -52,7 +49,7 @@ a img {
 
 body {
 	background: #000000 url(assets/landscape_background.png);
-	color: #a0a0a0;
+	color: #fff;
 	font-family: "Georgia", serif;
 	font-size: 100%;
 	line-height: 1.4;
@@ -66,16 +63,42 @@ body {
 	}
 }
 
-.alien-shock {
+.ship-wreck, .alien-shock, .alien-breath, .hitch-guide {
 	background: #555;
 	position: absolute;
-	height: 300px;
-	width: 300px;
+	height: 500px;
+	width: 500px;
 	z-index: 1;
-	top: 550px;
-	left: 300px;
+	top: 450px;
+	left: 1010px;
 }
 
-.alien-shock.shocking {
+.active {
+	background: #f55;
+}
+
+.alien-shock {
+	left: 3530px;
+}
+
+.alien-shock.active {
 	background: #55f;
 }
+
+.alien-breath {
+	left: 6050px;
+}
+
+.alien-breath.active {
+	background: #5f5;
+}
+
+.hitch-guide {
+	left: 8570px;
+}
+
+.hitch-guide.active {
+	background: #ff5;
+}
+
+
