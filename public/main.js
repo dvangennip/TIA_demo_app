@@ -4,47 +4,28 @@ const version = '0.0.1';
 
 // ----------------------------------------------------------------------------
 
-function updateMessages(xhr, status, args) 
-{
-	//  data format: tracker1-tracker2-trackerN-...
-	//  per tracker: 1,action,x,close_to_screen,area_code
+function updateMessages (xhr, status, args) {
+	//  data format: tracker1-tracker2-...-trackerN
+	//  per tracker: 1,action,x_position,close_to_screen,area_code
 	//      example: 1,a,7583,0,2
 	let d = args.data;
 	let td = d.split('-');
 	for (var i = td.length - 1; i >= 0; i--) {
 		td[i] = td[i].split(',')
 
-		switch (td[i]) {
-			case '1':
-				// TODO send relevant event based on state
-				break;
-			case '2':
-				// TODO send relevant event based on state
-				break;
-			case '3':
-				// TODO send relevant event based on state
-				break;
-			case '4':
-				// TODO send relevant event based on state
-				break;
-			case '5':
-				// TODO send relevant event based on state
-				break;
-			case '6':
-				// TODO send relevant event based on state
-				break;
-			case '7':
-				// TODO send relevant event based on state
-				break;
-			case '8':
-				// TODO send relevant event based on state
-				break;
-			default: // do nothing
-				break;
-		}
+		// convert to useful data formats
+		let trackerData = {
+			'id'    : parseInt(td[i][0], 10),
+			'action': td[i][1],
+			'x'     : parseInt(td[i][2], 10),
+			'close' : (td[i][3] == '1') ? true : false,
+			'area'  : parseInt(td[i][4], 10)
+		};
+
+		// send out custom event to be subscribed to by other elements on the page
+		let trackerEvent = new CustomEvent('tracker'+trackerData['id']+'update', {detail: trackerData});
+		window.dispatchEvent(trackerEvent);
 	}
-	
-	console.log(args.data);
 }
 
 // ----------------------------------------------------------------------------
@@ -102,17 +83,24 @@ Element.prototype.insertAfter = function (newchild) {
 class MainLogic {
 	constructor () {
 		// initiate tracker connector
-		this.tc = new TrackerConnector();
+		// this.tc = new TrackerConnector();
 
 		// initiate all situations
 		//this.environment = new Environment();
-		this.sShip        = new Situation('ship_wreck');
-		this.sAlienShock  = new Situation('alien_shock');
-		this.sAlienBreath = new Situation('alien_breath');
-		this.sGuide       = new Situation('hitch_guide');
+		this.sShip        = new Situation('ship_wreck', 1);
+		this.sAlienShock  = new Situation('alien_shock', 2);
+		this.sAlienBreath = new Situation('alien_breath', 3);
+		this.sGuide       = new Situation('hitch_guide', 4);
 		
 		// initiate all tools
-		// TODO
+		this.tMagnifier1   = new Tool(1);
+		this.tMagnifier2   = new Tool(2);
+		this.tShocker1     = new Tool(3);
+		this.tShocker2     = new Tool(4);
+		this.tRattleStick1 = new Tool(5);
+		this.tRattleStick2 = new Tool(6);
+		this.tWaterNozzle  = new Tool(7);
+		this.tWaterPump    = new Tool(8);
 	}
 }
 
@@ -168,7 +156,9 @@ class Environment {
 }
 
 class Situation {
-	constructor (inName) {
+	constructor (inName, inAreaCode) {
+		this.areaCode = inAreaCode;
+
 		// define onscreen element
 		this.el = Element.make('div', {
 			'class': inName.replace('_','-'), // just following convention of using - instead of _
@@ -180,6 +170,7 @@ class Situation {
 		// setup event listeners
 		this.el.addEventListener('mouseover', this.update.bind(this), false);
 		this.el.addEventListener('mouseout', this.update.bind(this), false);
+
 	}
 
 	/**
@@ -218,26 +209,26 @@ class Situation {
 	}
 }
 
-class SituationAlienShock extends Situation {
-	constructor () {
-		super();
+// class SituationAlienShock extends Situation {
+// 	constructor () {
+// 		super();
 
 		
-	}
+// 	}
 
-	update (inEvent) {
+// 	update (inEvent) {
 		
-	}
-}
+// 	}
+// }
 
 class Tool {
 	constructor (trackerID) {
-		this.tracker = (trackerID) ? trackerID : 0;
-		this.pos     = new Position();
-		this.active  = False;
+		this.trackerID = (trackerID) ? trackerID : 0;
+		// this.pos     = new Position();
+		// this.active  = False;
 
 		// setup event listeners
-		window.addEventListener('tracker1update', this.handleTrackerEvent.bind(this), false);
+		window.addEventListener('tracker'+this.trackerID+'update', this.handleTrackerEvent.bind(this), false);
 	}
 
 	/**
@@ -262,18 +253,15 @@ class Tool {
  * Call any class or function here that needs to ready from the start
  */
 var initialise = function () {
-	var main = new MainLogic ();
+	var main = new MainLogic();
 
-	// define nextMessage function if it's not defined yet to avoid undefined function errors
-	if (typeof nextMessage !== 'function') {
+	// check existence of nextMessage function to avoid reference errors
+	if (typeof nextMessage === 'function') {
+		// from now on, call for updates
+		setInterval(nextMessage, 5000); // update every x ms
+	} else {
 		console.log('WARNING: no nextMessage function exists');
-		window.nextMessage = function () {
-			console.log('call to nextMessage dummy function');
-		}
 	}
-
-	// from now on, call for updates
-	setInterval(nextMessage, 5000); // update every x ms 
 }
 
 /**
