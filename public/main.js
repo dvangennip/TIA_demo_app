@@ -2,6 +2,11 @@
 
 const version = '0.0.1';
 
+/**
+some notes:
+- spatial audio: perhaps use https://github.com/goldfire/howler.js#documentation
+*/
+
 // ----------------------------------------------------------------------------
 
 function updateMessages (xhr, status, args) {
@@ -93,48 +98,32 @@ class MainLogic {
 		this.sGuide       = new Situation('hitch_guide', 4);
 		
 		// initiate all tools
-		this.tMagnifier1   = new Tool(1);
-		this.tMagnifier2   = new Tool(2);
-		this.tShocker1     = new Tool(3);
-		this.tShocker2     = new Tool(4);
-		this.tRattleStick1 = new Tool(5);
-		this.tRattleStick2 = new Tool(6);
-		this.tWaterNozzle  = new Tool(7);
-		this.tWaterPump    = new Tool(8);
-	}
-}
+		this.tMagnifier1   = new Tool(1, 'tm1');
+		this.tMagnifier2   = new Tool(2, 'tm2');
+		this.tShocker1     = new Tool(3, 'ts1');
+		this.tShocker2     = new Tool(4, 'ts2');
+		this.tRattleStick1 = new Tool(5, 'tr1');
+		this.tRattleStick2 = new Tool(6, 'tr2');
+		this.tWaterNozzle  = new Tool(7, 'tw1');
+		this.tWaterPump    = new Tool(8, 'tw2');
 
-class TrackerConnector {
-	constructor () {
-		// setup server connection
-
-		// setup event listeners
-		window.addEventListener('beforeunload', this.close.bind(this));
-
-		// setup repeated calls to update function
+		// check existence of nextMessage function to avoid reference errors
+		if (typeof nextMessage === 'function') {
+			// from now on, call for updates
+			setInterval(nextMessage, 5000); // update every x ms
+		} else {
+			console.log('WARNING: no nextMessage function exists, using a mock function instead');
+			setInterval(this.nextMessageMock, 3000);
+		}
 	}
 
-	connect () {
-		// connect to server
-	}
-
-	disconnect () {
-		// disconnect from server
-	}
-
-	close (inEvent) {
-		// make sure we've disconnected first
-		this.disconnect();
-
-		// clean up server connection
-	}
-
-	update () {
-		// read and parse data from server?
-
-		// send out updated position events for each tracker
-		let tracker1Event = new CustomEvent('tracker1update', {detail: {x: 0, y: 0, z: 0}});
-		window.dispatchEvent(tracker1Event);
+	nextMessageMock () {
+		let request = new XMLHttpRequest();
+		request.addEventListener("load", (e) => {
+			updateMessages(request, request.status, JSON.parse(request.response));
+		});
+		request.open("GET", 'http://localhost:3000/getdata');
+		request.send();
 	}
 }
 
@@ -146,7 +135,7 @@ class Environment {
 			'loop': true
 		})
 		this.ambientSource = Element.make('source', {
-			'src': 'assets/sound_ambient_mars_insight.wav',
+			'src': 'assets/sound_ambient.mp3',
 			'type': 'audio/wave'
 		})
 		this.ambientAudio.appendChild(this.ambientSource);
@@ -222,8 +211,9 @@ class Situation {
 // }
 
 class Tool {
-	constructor (trackerID) {
-		this.trackerID = (trackerID) ? trackerID : 0;
+	constructor (trackerID, trackerName) {
+		this.trackerID   = (trackerID) ? trackerID : 0;
+		this.trackerName = trackerName;
 		// this.pos     = new Position();
 		// this.active  = False;
 
@@ -244,9 +234,11 @@ class Tool {
 	}
 
 	handleTrackerEvent (inEvent) {
-		console.log(inEvent.detail);
+		// console.log(inEvent.detail);
 	}
 }
+
+// ----------------------------------------------------------------------------
 
 /**
  * Starting point of the script
@@ -254,14 +246,6 @@ class Tool {
  */
 var initialise = function () {
 	var main = new MainLogic();
-
-	// check existence of nextMessage function to avoid reference errors
-	if (typeof nextMessage === 'function') {
-		// from now on, call for updates
-		setInterval(nextMessage, 5000); // update every x ms
-	} else {
-		console.log('WARNING: no nextMessage function exists');
-	}
 }
 
 /**

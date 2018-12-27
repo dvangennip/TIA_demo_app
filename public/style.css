@@ -48,13 +48,20 @@ a img {
 /* Common elements */
 
 body {
-	background: #000000 url(assets/landscape_background.png);
 	color: #fff;
 	font-family: "Georgia", serif;
 	font-size: 100%;
 	line-height: 1.4;
+}
+
+body.arena {
+	background: #000000 url(assets/landscape_background.png);
 	height: 1200px;  /* Huge dimentions for the data arena screen */
 	width: 10080px;
+}
+
+body.mock {
+	background: #fff url(assets/mock_data_arena.png) no-repeat;
 }
 
 @media screen and (min-width: 3000px) {
@@ -101,4 +108,34 @@ body {
 	background: #ff5;
 }
 
+.tracker {
+	background: #333;
+	height: 32px;
+	width: 32px;
+	display: block;
+	position: absolute;
+	text-align: center;
+	vertical-align: center;
+	user-select: none;
+	-moz-user-select: none;
+}
 
+.tracker.magnifier {
+	background: #933;
+}
+
+.tracker.shocker {
+	background: #737;
+}
+
+.tracker.rattlestick {
+	background: #393;
+}
+
+.tracker.water-nozzle {
+	background: #239;
+}
+
+.tracker.water-pump {
+	background: #347;
+}
