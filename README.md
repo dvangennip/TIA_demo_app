@@ -9,13 +9,22 @@ This demo was part of a small project into the use of tangible objects in a coll
 
 ## Credits
 The project was funded by a UTS Data Arena Research Exhibit Grant 2017 for the creation and implementation of a tangible user interface in the UTS Data Arena (a 360-degree screen). This grant was awarded to Elise van den Hoven and Roberto Martinez-Maldonado.
-**TBD mention those involved**
+**TBD mention those involved, who did what**
 **TBD acknowledge input from everyone**
 
 ## Setup
 **TBD**
 
 ## Running the software
+There are two ways of running the code. The first assumes the use of a mock page to generate tracker input that is then fed to the arena view via an intermediary webserver. The second way of running uses the Data Arena and cannot be replicated outside of that environment.
+
+### Using the mock tracker page
+Start the node.js server first with
+	$ node mock_server.js
+
+Then open [http://localhost:3000/mock.html][2] in your webbrowser so that you’re able to generate tracker data. Finally, open the arena view by using [http://localhost:3000/index.html][3]. By adjusting the tracker markers on the mock page, you influence the behaviour on the arena page.
+
+### Using the Data Arena
 **TBD**
 
 ## Limitations and known issues
@@ -24,10 +33,14 @@ The project was funded by a UTS Data Arena Research Exhibit Grant 2017 for the c
 ## License
 **TBD**
 
-## Assets used from third parties
-- Audio samples from [Freesound.org][2]
-- [Audio from NASA’s Mars InSight pressure sensor while deployed on Mars][3]
+## Assets and code used from third parties
+- [Javascript State Machine][4] by jakesgordon (MIT license)
+- Audio samples from [Freesound.org][5] (CC0 license)
+- [Audio from NASA’s Mars InSight pressure sensor while deployed on Mars][6]
 
 [1]:	https://www.uts.edu.au/partners-and-community/data-arena/overview
-[2]:	https://freesound.org/
-[3]:	https://www.nasa.gov/connect/sounds/index.html
+[2]:	http://localhost:3000/mock.html
+[3]:	http://localhost:3000/index.html
+[4]:	https://github.com/jakesgordon/javascript-state-machine
+[5]:	https://freesound.org/
+[6]:	https://www.nasa.gov/connect/sounds/index.html

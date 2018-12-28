@@ -84,12 +84,28 @@ body.mock {
 	background: #f55;
 }
 
+.ship-wreck.fire {
+	background: #f55;
+}
+.ship-wreck.halffire {
+	background: #a55;
+}
+.ship-wreck.calm {
+	background: #333;
+}
+
+
 .alien-shock {
 	left: 3530px;
 }
-
-.alien-shock.active {
-	background: #55f;
+.alien-shock.arrested {
+	background: #555;
+}
+.alien-shock.sparking {
+	background: #43f;
+}
+.alien-shock.heartrate {
+	background: #94f;
 }
 
 .alien-breath {

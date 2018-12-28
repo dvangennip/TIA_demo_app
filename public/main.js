@@ -18,13 +18,15 @@ function updateMessages (xhr, status, args) {
 	for (var i = td.length - 1; i >= 0; i--) {
 		td[i] = td[i].split(',')
 
-		// convert to useful data formats
+		// convert to useful data format
 		let trackerData = {
-			'id'    : parseInt(td[i][0], 10),
-			'action': td[i][1],
-			'x'     : parseInt(td[i][2], 10),
-			'close' : (td[i][3] == '1') ? true : false,
-			'area'  : parseInt(td[i][4], 10)
+			'id'       : parseInt(td[i][0], 10),
+			//'actionKey': td[i][1],
+			'is_moving': (td[i][1] == 'c' || td[i][1] == 'd') ? true : false,
+			'pointed'  : (td[i][1] == 'b' || td[i][1] == 'd') ? true : false,
+			'x'        : parseInt(td[i][2], 10),
+			'close'    : (td[i][3] == '1') ? true : false,
+			'area'     : parseInt(td[i][4], 10)
 		};
 
 		// send out custom event to be subscribed to by other elements on the page
@@ -87,40 +89,41 @@ Element.prototype.insertAfter = function (newchild) {
 
 class MainLogic {
 	constructor () {
-		// initiate tracker connector
-		// this.tc = new TrackerConnector();
+		// initiate all tools
+		this.tools = {
+			'tm1': new Tool(1, 'tm1'),
+			'tm2': new Tool(2, 'tm2'),
+			'ts1': new Tool(3, 'ts1'),
+			'ts2': new Tool(4, 'ts2'),
+			'tr1': new Tool(5, 'tr1'),
+			'tr2': new Tool(6, 'tr2'),
+			'tw1': new Tool(7, 'tw1'),
+			'tw2': new Tool(8, 'tw2')
+		}
 
 		// initiate all situations
 		//this.environment = new Environment();
-		this.sShip        = new Situation('ship_wreck', 1);
-		this.sAlienShock  = new Situation('alien_shock', 2);
-		this.sAlienBreath = new Situation('alien_breath', 3);
-		this.sGuide       = new Situation('hitch_guide', 4);
-		
-		// initiate all tools
-		this.tMagnifier1   = new Tool(1, 'tm1');
-		this.tMagnifier2   = new Tool(2, 'tm2');
-		this.tShocker1     = new Tool(3, 'ts1');
-		this.tShocker2     = new Tool(4, 'ts2');
-		this.tRattleStick1 = new Tool(5, 'tr1');
-		this.tRattleStick2 = new Tool(6, 'tr2');
-		this.tWaterNozzle  = new Tool(7, 'tw1');
-		this.tWaterPump    = new Tool(8, 'tw2');
+		this.sShip        = new SituationShipWreck(  1, 'ship_wreck',   this.tools);
+		this.sAlienShock  = new SituationAlienShock( 2, 'alien_shock',  this.tools);
+		this.sAlienBreath = new Situation(           3, 'alien_breath', this.tools);
+		this.sGuide       = new Situation(           4, 'hitch_guide',  this.tools);
 
 		// check existence of nextMessage function to avoid reference errors
 		if (typeof nextMessage === 'function') {
 			// from now on, call for updates
-			setInterval(nextMessage, 5000); // update every x ms
+			setInterval(nextMessage, 1500); // update every x ms
 		} else {
 			console.log('WARNING: no nextMessage function exists, using a mock function instead');
-			setInterval(this.nextMessageMock, 3000);
+			setInterval(this.nextMessageMock, 1500);
 		}
 	}
 
 	nextMessageMock () {
 		let request = new XMLHttpRequest();
 		request.addEventListener("load", (e) => {
-			updateMessages(request, request.status, JSON.parse(request.response));
+			if (request.status == 200) {
+				updateMessages(request, request.status, JSON.parse(request.response));
+			}
 		});
 		request.open("GET", 'http://localhost:3000/getdata');
 		request.send();
@@ -145,8 +148,9 @@ class Environment {
 }
 
 class Situation {
-	constructor (inName, inAreaCode) {
+	constructor (inAreaCode, inName, inTools) {
 		this.areaCode = inAreaCode;
+		this.tools = inTools;
 
 		// define onscreen element
 		this.el = Element.make('div', {
@@ -157,27 +161,25 @@ class Situation {
 		document.getElementsByTagName('body')[0].appendChild(this.el);
 
 		// setup event listeners
-		this.el.addEventListener('mouseover', this.update.bind(this), false);
-		this.el.addEventListener('mouseout', this.update.bind(this), false);
-
+		// window.addEventListener('txxupdate', this.update.bind(this), false);
 	}
 
-	/**
-	 * Update state of the simulation
-	 */
 	update (inEvent) {
 		// respond to any new action events?
 		//console.log(inEvent);
-		this.state = (inEvent.type === 'mouseover') ? 'active' : 'default';
-		
-		this.el.addRemoveClass('active', this.state === 'active');
+	}
 
-		// switch (this.state) {
-		// 	case 'active':
-		// 		break;
-		// 	default:
-		// 		break;
-		// }
+	handleAfterTransition (lifecycle) {
+		// console.log(lifecycle.transition, lifecycle.from, lifecycle.to);
+		// set new state info
+		this.current_state_timestamp = (new Date()).getTime();
+
+		// adjust visuals
+		this.el.removeClass(lifecycle.from);
+		this.el.addClass(lifecycle.to);
+
+		// adjust audio
+		// TODO
 	}
 
 	playSound (name) {
@@ -198,60 +200,182 @@ class Situation {
 	}
 }
 
-// class SituationAlienShock extends Situation {
-// 	constructor () {
-// 		super();
+class SituationShipWreck extends Situation {
+	constructor (inAreaCode, inName, inTools) {
+		super(inAreaCode, inName, inTools);
 
-		
-// 	}
-
-// 	update (inEvent) {
-		
-// 	}
-// }
-
-class Tool {
-	constructor (trackerID, trackerName) {
-		this.trackerID   = (trackerID) ? trackerID : 0;
-		this.trackerName = trackerName;
-		// this.pos     = new Position();
-		// this.active  = False;
+		this.fsm = new StateMachine({
+			init: 'fire',
+			transitions: [
+				{ name: 'extinguish',   from: 'fire',     to: 'halffire' },
+				{ name: 'extinguished', from: 'halffire', to: 'calm'     },
+				{ name: 'flareup',      from: 'halffire', to: 'fire'     },
+				{ name: 'lightup',      from: 'calm',     to: 'halffire' }
+			],
+			methods: {
+				// onExtinguish:      function () { console.log('Ship extinguishing') },
+				// onExtinguished:    function () { console.log('Ship extinguished')  },
+				// onFlareup:         function () { console.log('Ship flared up')     },
+				// onLightup:         function () { console.log('Ship lighted up')    },
+				onAfterTransition: this.handleAfterTransition.bind(this)
+			}
+		});
 
 		// setup event listeners
-		window.addEventListener('tracker'+this.trackerID+'update', this.handleTrackerEvent.bind(this), false);
+		window.addEventListener('tw1update', this.update.bind(this), false);
+		window.addEventListener('tw2update', this.update.bind(this), false);
+		window.addEventListener('ts1update', this.update.bind(this), false);
+		window.addEventListener('ts2update', this.update.bind(this), false);
 	}
 
-	/**
-	 * Update state of the simulation
-	 */
-	update () {
-		// update position from tracker?
-		// figure out active state?
-		// send out action event?
+	update (inEvent) {
+		// super(inEvent);
+		let tw1 = this.tools['tw1'],
+			tw2 = this.tools['tw2'],
+			ts1 = this.tools['ts1'],
+			ts2 = this.tools['ts2'];
 
-		// if state is x, do something
-		// else if state is y, do something else
+		switch (this.fsm.state) {
+			case 'fire':
+				if (tw1.area == 1 && tw1.close_to_screen && tw1.pointed_at_screen && tw2.is_moving) {
+					this.fsm.extinguish();
+				}
+				break;
+			case 'halffire':
+				if (tw1.area == 1 && tw1.close_to_screen && tw1.pointed_at_screen && tw2.is_moving) {
+					// do nothing, unless we've been in this state for 5+ seconds
+					if (this.current_state_timestamp + 5000 < (new Date().getTime())) {
+						this.fsm.extinguished();
+					}
+				} else if (this.current_state_timestamp + 3000 < (new Date().getTime())) {
+					this.fsm.flareup();
+				}
+				break;
+			case 'calm':
+				if (ts1.area == 1 && ts1.area == ts2.area && ts1.close_to_screen && ts2.close_to_screen && ts1.pointed_at_screen && ts2.pointed_at_screen) {
+					this.fsm.lightup();
+				}
+				break;
+			default: break;
+		}
+	}
+}
+
+class SituationAlienShock extends Situation {
+	constructor (inAreaCode, inName, inTools) {
+		super(inAreaCode, inName, inTools);
+
+		this.fsm = new StateMachine({
+			init: 'arrest',
+			transitions: [
+				{ name: 'shocked',       from: 'arrest',    to: 'sparking'  },
+				{ name: 'doubleshocked', from: 'sparking',  to: 'heartrate' },
+				{ name: 'arrested',      from: 'sparking',  to: 'arrest'    },
+				{ name: 'halfarrested',  from: 'heartrate', to: 'sparking'  }
+			],
+			methods: {
+				onAfterTransition: this.handleAfterTransition.bind(this)
+			}
+		});
+
+		// setup event listeners
+		window.addEventListener('ts1update', this.update.bind(this), false);
+		window.addEventListener('ts2update', this.update.bind(this), false);
 	}
 
-	handleTrackerEvent (inEvent) {
-		// console.log(inEvent.detail);
+	update (inEvent) {
+		let ts1 = this.tools['ts1'],
+			ts2 = this.tools['ts2'];
+
+		switch (this.fsm.state) {
+			case 'arrest':
+				if ((ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen) || (ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen)) {
+					this.fsm.shocked();
+				}
+				break;
+			case 'sparking':
+				if ((ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen) || (ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen)) {
+					// if either, remain in state
+					// if both, move on if in this state for some time
+					if (ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen && ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen) {
+						if (this.current_state_timestamp + 3000 < (new Date().getTime())) {
+							this.fsm.doubleshocked();
+						}
+					}
+				} else {
+					this.fsm.arrested()
+				}
+				break;
+			case 'heartrate':
+				// continued shocks cause a new arrest
+				if (ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen && ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen) {
+					if (this.current_state_timestamp + 2000 < (new Date().getTime())) {
+						this.fsm.halfarrested();
+					}
+				}
+				break;
+			default: break;
+		}
+	}
+}
+
+class Tool {
+	constructor (inID, inName) {
+		this.toolID            = (inID) ? inID : 0;
+		this.toolName          = inName;
+		this.pos               = 0;
+		this.close_to_screen   = false;
+		this.area              = 0;
+		this.pointed_at_screen = false;
+		this.is_moving         = false;
+
+		// setup event listeners
+		window.addEventListener('tracker'+this.toolID+'update', this.update.bind(this), false);
+	}
+
+	update (inEvent) {
+		// update position from tracker
+		let d = inEvent.detail;
+		let change = false;
+
+		if (this.pos != d.x) {
+			this.pos = d.x;
+			change = true;
+		}
+		if (this.close_to_screen != d.close) {
+			this.close_to_screen = d.close;
+			change = true;
+		}
+		if (this.area != d.area) {
+			this.area = d.area;
+			change = true;
+		}
+		if (this.pointed_at_screen != d.pointed) {
+			this.pointed_at_screen = d.pointed;
+			change = true;
+		}
+		if (this.is_moving != d.is_moving) {
+			this.is_moving = d.is_moving;
+			change = true;
+		}
+
+		// send out change event
+		if (change) {
+			let toolEvent = new CustomEvent(this.toolName+'update', {detail: this});
+			window.dispatchEvent(toolEvent);
+		}
+
+		// update state representation on screen
+		// TODO
 	}
 }
 
 // ----------------------------------------------------------------------------
 
 /**
- * Starting point of the script
- * Call any class or function here that needs to ready from the start
- */
-var initialise = function () {
-	var main = new MainLogic();
-}
-
-/**
  * Wait for whole page to load before setting up.
  * Prevents problems with objects not loaded yet while trying to assign these.
  */
 window.addEventListener('pageshow', function () {
-	initialise();
+	window.main = new MainLogic();
 }, false);

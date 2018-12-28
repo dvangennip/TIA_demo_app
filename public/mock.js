@@ -22,7 +22,7 @@ class MockTrackers {
 		window.addEventListener('mouseup',   this.dragHandler.bind(this), true);
 
 		// set up updates
-		setInterval(this.sendPositions.bind(this), 1000); // update every x ms
+		setInterval(this.sendPositions.bind(this), 500); // update every x ms
 	}
 
 	sendPositions () {
@@ -59,6 +59,7 @@ class Tracker {
 	constructor (parent, num, id) {
 		this.parent = parent;
 		this.num = num;
+		this.ID = id;
 		this.position = {
 			'x' : 0,
 			'y' : 0,
@@ -89,10 +90,16 @@ class Tracker {
 				x: this.position.x - inEvent.clientX,
 				y: this.position.y - inEvent.clientY
 			};
+			this.is_moving = true;
 		}
 		if (this.dragActive && inEvent.type === 'mouseup') {
 			this.dragActive = false;
 			this.parent.addRemoveActiveElement(this, false);
+
+			// cancel is_moving some time after last movement was recorded
+			setTimeout(function () {
+				this.is_moving = false;
+			}.bind(this), 3500);
 		}
 		if (this.dragActive && inEvent.type === 'mousemove') {
 			this.position.x = inEvent.clientX + this.dragOffset.x;
@@ -122,6 +129,18 @@ class Tracker {
 			this.close_to_screen = (this.position.r > 0.59 && this.position.r < 1.02) ? 1 : 0;
 
 			this.position.s = Math.round(this.position.ap / (2*Math.PI) * 10080);
+
+			// update actionKey
+			let pointed = (this.position.r > 0.75 && this.position.r < 1.02); // very rough approximation
+			if (!this.is_moving && !pointed) {
+				this.actionKey = 'a';
+			} else if (!this.is_moving && pointed) {
+				this.actionKey = 'b';
+			} else if (this.is_moving && !pointed) {
+				this.actionKey = 'c';
+			} else if (this.is_moving && pointed) {
+				this.actionKey = 'd';
+			}
 		}
 	}
 

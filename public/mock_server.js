@@ -44,7 +44,7 @@ const server = http.createServer((request, response) => {
 		    data: positionData
 		}));
 	} else {
-		console.log(request.method, id);
+		let outcome = 200;
 
 		// return a static file
 		let filename = (id.length !== 0) ? id : '/index.html',
@@ -54,6 +54,7 @@ const server = http.createServer((request, response) => {
 
 		fs.readFile(filename, function(error, data) {
 			if (error) {
+				outcome = 404;
 				response.writeHead(404, {'Content-Type': 'text/plain'});
 				response.write('Error 404 - File not found\n');
 				response.write('More info: ' + JSON.stringify(error));
@@ -66,6 +67,7 @@ const server = http.createServer((request, response) => {
 				response.end(data);
 			}
 		});
+		console.log(request.method, outcome, id);
 	}
 });
 
