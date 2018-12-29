@@ -106,7 +106,7 @@ class MainLogic {
 		this.sShip        = new SituationShipWreck(   1, 'ship_wreck',   this.tools);
 		this.sAlienShock  = new SituationAlienShock(  2, 'alien_shock',  this.tools);
 		this.sAlienBreath = new SituationAlienBreath( 3, 'alien_breath', this.tools);
-		// this.sGuide       = new Situation(            4, 'hitch_guide',  this.tools);
+		this.sGuide       = new SituationGuide(       4, 'hitch_guide',  this.tools);
 
 		// check existence of nextMessage function to avoid reference errors
 		if (typeof nextMessage === 'function') {
@@ -127,6 +127,74 @@ class MainLogic {
 		});
 		request.open("GET", 'http://localhost:3000/getdata');
 		request.send();
+	}
+}
+
+class Tool {
+	constructor (inID, inName) {
+		this.toolID            = (inID) ? inID : 0;
+		this.toolName          = inName;
+		this.pos               = 0;
+		this.pos_previous      = 0;
+		this.close_to_screen   = false;
+		this.area              = 0;
+		this.pointed_at_screen = false;
+		this.is_moving         = false;
+		this.moving_since      = 0;
+		this.moving_shift      = 0;
+
+		// setup event listeners
+		window.addEventListener('tracker'+this.toolID+'update', this.update.bind(this), false);
+	}
+
+	update (inEvent) {
+		// update position from tracker
+		let d = inEvent.detail;
+		let change = false;
+
+		if (this.pos != d.x) {
+			this.pos = d.x;
+			change = true;
+		}
+		if (this.pos != this.pos_previous || this.pos - this.pos_previous != this.moving_shift) {
+			this.moving_shift = this.pos - this.pos_previous;
+			this.pos_previous = this.pos;
+			change = true;
+		}
+		if (this.close_to_screen != d.close) {
+			this.close_to_screen = d.close;
+			change = true;
+		}
+		if (this.area != d.area) {
+			this.area = d.area;
+			change = true;
+		}
+		if (this.pointed_at_screen != d.pointed) {
+			this.pointed_at_screen = d.pointed;
+			change = true;
+		}
+		if (this.is_moving != d.is_moving) {
+			this.is_moving = d.is_moving;
+			change = true;
+
+			// only updated when there is a change in moving state
+			if (this.is_moving) {
+				this.moving_since = new Date().getTime();
+			} else {
+				this.moving_since = 0;
+				this.moving_shift = 0;
+				this.pos_previous = this.pos;
+			}
+		}
+
+		// send out change event
+		if (change) {
+			let toolEvent = new CustomEvent(this.toolName+'update', {detail: this});
+			window.dispatchEvent(toolEvent);
+		}
+
+		// update state representation on screen
+		// TODO
 	}
 }
 
@@ -346,57 +414,39 @@ class SituationAlienBreath extends Situation {
 	}
 }
 
-class Tool {
-	constructor (inID, inName) {
-		this.toolID            = (inID) ? inID : 0;
-		this.toolName          = inName;
-		this.pos               = 0;
-		this.close_to_screen   = false;
-		this.area              = 0;
-		this.pointed_at_screen = false;
-		this.is_moving         = false;
-		this.moving_since      = 0;
-
-		// setup event listeners
-		window.addEventListener('tracker'+this.toolID+'update', this.update.bind(this), false);
+class SituationGuide extends Situation {
+	constructor (inAreaCode, inName, inTools) {
+		super(inAreaCode, inName, inTools, [
+				{ name: 'open',  from: 'closed', to: 'opened' },
+				{ name: 'close', from: 'opened', to: 'closed' },
+			], ['tm1', 'tm2']);
 	}
 
 	update (inEvent) {
-		// update position from tracker
-		let d = inEvent.detail;
-		let change = false;
+		let tm1 = this.tools['tm1'],
+			tm2 = this.tools['tm2'];
 
-		if (this.pos != d.x) {
-			this.pos = d.x;
-			change = true;
+		switch (this.fsm.state) {
+			case 'closed':
+				if ((tm1.area == 4 && tm1.close_to_screen && tm1.pointed_at_screen) || (tm2.area == 4 && tm2.close_to_screen && tm2.pointed_at_screen)) {
+					this.fsm.open();
+				}
+				break;
+			case 'opened':
+				if ((tm1.area == 4 && tm1.close_to_screen && tm1.pointed_at_screen) || (tm2.area == 4 && tm2.close_to_screen && tm2.pointed_at_screen)) {
+					// if either, remain in state
+					// if both, let people browse the guide
+					if (tm1.area == 4 && tm1.close_to_screen && tm1.pointed_at_screen && tm2.area == 4 && tm2.close_to_screen && tm2.pointed_at_screen) {
+						// if at least one is moving, use this for positioning
+						// console.log(tm1.moving_shift, tm2.moving_shift);
+						// TODO
+					}
+				} else {
+					this.fsm.close();
+				}
+				break;
+			default: break;
 		}
-		if (this.close_to_screen != d.close) {
-			this.close_to_screen = d.close;
-			change = true;
-		}
-		if (this.area != d.area) {
-			this.area = d.area;
-			change = true;
-		}
-		if (this.pointed_at_screen != d.pointed) {
-			this.pointed_at_screen = d.pointed;
-			change = true;
-		}
-		if (this.is_moving != d.is_moving) {
-			this.is_moving = d.is_moving;
-			change = true;
-
-			this.moving_since = (this.is_moving) ? (new Date().getTime()) : 0;
-		}
-
-		// send out change event
-		if (change) {
-			let toolEvent = new CustomEvent(this.toolName+'update', {detail: this});
-			window.dispatchEvent(toolEvent);
-		}
-
-		// update state representation on screen
-		// TODO
 	}
 }
 

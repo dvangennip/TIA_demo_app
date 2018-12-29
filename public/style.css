@@ -124,8 +124,10 @@ body.mock {
 .hitch-guide {
 	left: 8570px;
 }
-
-.hitch-guide.active {
+.hitch-guide.closed {
+	background: #555;
+}
+.hitch-guide.opened {
 	background: #ff5;
 }
 
