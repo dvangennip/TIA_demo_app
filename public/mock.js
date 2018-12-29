@@ -69,9 +69,11 @@ class Tracker {
 			'r' : 0, // r represents radius from centre
 			'ap': 0  // angle in polar coordinates (radians)
 		},
-		this.actionKey = 'a',
-		this.close_to_screen = false,
-		this.area = 1
+		this.actionKey         = 'a',
+		this.is_moving         = false;
+		this.pointed_at_screen = false;
+		this.close_to_screen   = false,
+		this.area              = 1
 
 		// setup display element
 		this.el = document.getElementById(id);
@@ -99,7 +101,8 @@ class Tracker {
 			// cancel is_moving some time after last movement was recorded
 			setTimeout(function () {
 				this.is_moving = false;
-			}.bind(this), 3500);
+				this.updateActionKey();
+			}.bind(this), 2500);
 		}
 		if (this.dragActive && inEvent.type === 'mousemove') {
 			this.position.x = inEvent.clientX + this.dragOffset.x;
@@ -131,16 +134,20 @@ class Tracker {
 			this.position.s = Math.round(this.position.ap / (2*Math.PI) * 10080);
 
 			// update actionKey
-			let pointed = (this.position.r > 0.75 && this.position.r < 1.02); // very rough approximation
-			if (!this.is_moving && !pointed) {
-				this.actionKey = 'a';
-			} else if (!this.is_moving && pointed) {
-				this.actionKey = 'b';
-			} else if (this.is_moving && !pointed) {
-				this.actionKey = 'c';
-			} else if (this.is_moving && pointed) {
-				this.actionKey = 'd';
-			}
+			this.pointed_at_screen = (this.position.r > 0.75 && this.position.r < 1.02); // very rough approximation
+			this.updateActionKey();
+		}
+	}
+
+	updateActionKey () {
+		if (!this.is_moving && !this.pointed_at_screen) {
+			this.actionKey = 'a';
+		} else if (!this.is_moving && this.pointed_at_screen) {
+			this.actionKey = 'b';
+		} else if (this.is_moving && !this.pointed_at_screen) {
+			this.actionKey = 'c';
+		} else if (this.is_moving && this.pointed_at_screen) {
+			this.actionKey = 'd';
 		}
 	}
 
