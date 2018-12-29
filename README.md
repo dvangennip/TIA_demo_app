@@ -9,7 +9,9 @@ This demo was part of a small project into the use of tangible objects in a coll
 
 ## Credits
 The project was funded by a UTS Data Arena Research Exhibit Grant 2017 for the creation and implementation of a tangible user interface in the UTS Data Arena (a 360-degree screen). This grant was awarded to Elise van den Hoven and Roberto Martinez-Maldonado.
+
 **TBD mention those involved, who did what**
+
 **TBD acknowledge input from everyone**
 
 ## Setup
@@ -19,10 +21,11 @@ The project was funded by a UTS Data Arena Research Exhibit Grant 2017 for the c
 There are two ways of running the code. The first assumes the use of a mock page to generate tracker input that is then fed to the arena view via an intermediary webserver. The second way of running uses the Data Arena and cannot be replicated outside of that environment.
 
 ### Using the mock tracker page
-Start the node.js server first with
+Start the [node.js][7] server first with
+
 	$ node mock_server.js
 
-Then open [http://localhost:3000/mock.html][2] in your webbrowser so that you’re able to generate tracker data. Finally, open the arena view by using [http://localhost:3000/index.html][3]. By adjusting the tracker markers on the mock page, you influence the behaviour on the arena page.
+Then open `[http://localhost:3000/mock.html][2]` in your webbrowser so you’re able to generate tracker data. Finally, open the arena view by using `[http://localhost:3000/index.html][3]`. By adjusting the tracker markers on the mock page, you influence the behaviour on the arena page.
 
 ### Using the Data Arena
 **TBD**
@@ -44,3 +47,4 @@ Then open [http://localhost:3000/mock.html][2] in your webbrowser so that you’
 [4]:	https://github.com/jakesgordon/javascript-state-machine
 [5]:	https://freesound.org/
 [6]:	https://www.nasa.gov/connect/sounds/index.html
+[7]:	https://nodejs.org/en/

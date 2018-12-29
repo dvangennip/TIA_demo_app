@@ -111,8 +111,13 @@ body.mock {
 .alien-breath {
 	left: 6050px;
 }
-
-.alien-breath.active {
+.alien-breath.nobreath {
+	background: #368;
+}
+.alien-breath.disharmony {
+	background: #936;
+}
+.alien-breath.breathing {
 	background: #5f5;
 }
 

@@ -103,10 +103,10 @@ class MainLogic {
 
 		// initiate all situations
 		//this.environment = new Environment();
-		this.sShip        = new SituationShipWreck(  1, 'ship_wreck',   this.tools);
-		this.sAlienShock  = new SituationAlienShock( 2, 'alien_shock',  this.tools);
-		this.sAlienBreath = new Situation(           3, 'alien_breath', this.tools);
-		this.sGuide       = new Situation(           4, 'hitch_guide',  this.tools);
+		this.sShip        = new SituationShipWreck(   1, 'ship_wreck',   this.tools);
+		this.sAlienShock  = new SituationAlienShock(  2, 'alien_shock',  this.tools);
+		this.sAlienBreath = new SituationAlienBreath( 3, 'alien_breath', this.tools);
+		// this.sGuide       = new Situation(            4, 'hitch_guide',  this.tools);
 
 		// check existence of nextMessage function to avoid reference errors
 		if (typeof nextMessage === 'function') {
@@ -148,7 +148,7 @@ class Environment {
 }
 
 class Situation {
-	constructor (inAreaCode, inName, inTools) {
+	constructor (inAreaCode, inName, inTools, inTransitions, inEvents) {
 		this.areaCode = inAreaCode;
 		this.tools = inTools;
 
@@ -160,8 +160,19 @@ class Situation {
 		})
 		document.getElementsByTagName('body')[0].appendChild(this.el);
 
-		// setup event listeners
-		// window.addEventListener('txxupdate', this.update.bind(this), false);
+		// setup finite state machine
+		this.fsm = new StateMachine({
+			init: inTransitions[0].from,
+			transitions: inTransitions,
+			methods: {
+				onAfterTransition: this.handleAfterTransition.bind(this)
+			}
+		});
+
+		// setup all event listeners
+		for (var i = inEvents.length - 1; i >= 0; i--) {
+			window.addEventListener(inEvents[i]+'update', this.update.bind(this), false);
+		}
 	}
 
 	update (inEvent) {
@@ -202,30 +213,12 @@ class Situation {
 
 class SituationShipWreck extends Situation {
 	constructor (inAreaCode, inName, inTools) {
-		super(inAreaCode, inName, inTools);
-
-		this.fsm = new StateMachine({
-			init: 'fire',
-			transitions: [
+		super(inAreaCode, inName, inTools, [
 				{ name: 'extinguish',   from: 'fire',     to: 'halffire' },
 				{ name: 'extinguished', from: 'halffire', to: 'calm'     },
 				{ name: 'flareup',      from: 'halffire', to: 'fire'     },
 				{ name: 'lightup',      from: 'calm',     to: 'halffire' }
-			],
-			methods: {
-				// onExtinguish:      function () { console.log('Ship extinguishing') },
-				// onExtinguished:    function () { console.log('Ship extinguished')  },
-				// onFlareup:         function () { console.log('Ship flared up')     },
-				// onLightup:         function () { console.log('Ship lighted up')    },
-				onAfterTransition: this.handleAfterTransition.bind(this)
-			}
-		});
-
-		// setup event listeners
-		window.addEventListener('tw1update', this.update.bind(this), false);
-		window.addEventListener('tw2update', this.update.bind(this), false);
-		window.addEventListener('ts1update', this.update.bind(this), false);
-		window.addEventListener('ts2update', this.update.bind(this), false);
+			], ['tw1', 'tw2', 'ts1', 'ts2']);
 	}
 
 	update (inEvent) {
@@ -263,24 +256,12 @@ class SituationShipWreck extends Situation {
 
 class SituationAlienShock extends Situation {
 	constructor (inAreaCode, inName, inTools) {
-		super(inAreaCode, inName, inTools);
-
-		this.fsm = new StateMachine({
-			init: 'arrest',
-			transitions: [
+		super(inAreaCode, inName, inTools, [
 				{ name: 'shocked',       from: 'arrest',    to: 'sparking'  },
 				{ name: 'doubleshocked', from: 'sparking',  to: 'heartrate' },
 				{ name: 'arrested',      from: 'sparking',  to: 'arrest'    },
 				{ name: 'halfarrested',  from: 'heartrate', to: 'sparking'  }
-			],
-			methods: {
-				onAfterTransition: this.handleAfterTransition.bind(this)
-			}
-		});
-
-		// setup event listeners
-		window.addEventListener('ts1update', this.update.bind(this), false);
-		window.addEventListener('ts2update', this.update.bind(this), false);
+			], ['ts1', 'ts2']);
 	}
 
 	update (inEvent) {
@@ -319,6 +300,52 @@ class SituationAlienShock extends Situation {
 	}
 }
 
+class SituationAlienBreath extends Situation {
+	constructor (inAreaCode, inName, inTools) {
+		super(inAreaCode, inName, inTools, [
+				{ name: 'rattled',      from: 'nobreath',   to: 'disharmony' },
+				{ name: 'harmonised',   from: 'disharmony', to: 'breathing'  },
+				{ name: 'deharmonised', from: 'disharmony', to: 'nobreath'   },
+				{ name: 'deharmonised', from: 'breathing',  to: 'disharmony' }
+			], ['tr1', 'tr2']);
+	}
+
+	update (inEvent) {
+		let tr1 = this.tools['tr1'],
+			tr2 = this.tools['tr2'];
+
+		switch (this.fsm.state) {
+			case 'nobreath':
+				if ((tr1.area == 3 && tr1.close_to_screen && tr1.is_moving) || (tr2.area == 3 && tr2.close_to_screen && tr2.is_moving)) {
+					this.fsm.rattled();
+				}
+				break;
+			case 'disharmony':
+				if ((tr1.area == 3 && tr1.close_to_screen && tr1.is_moving) || (tr2.area == 3 && tr2.close_to_screen && tr2.is_moving)) {
+					// if either, remain in state
+					// if both, move on if in this state for some time
+					if (tr1.area == 3 && tr1.close_to_screen && tr1.is_moving && tr2.area == 3 && tr2.close_to_screen && tr2.is_moving) {
+						if (this.current_state_timestamp + 5000 < (new Date().getTime())) {
+							this.fsm.harmonised();
+						}
+					}
+				} else {
+					this.fsm.deharmonised()
+				}
+				break;
+			case 'breathing':
+				// continued harmonising causes new disharmony
+				if (tr1.area == 3 && tr1.close_to_screen && tr1.is_moving && tr2.area == 3 && tr2.close_to_screen && tr2.is_moving) {
+					if (this.current_state_timestamp + 5000 < (new Date().getTime())) {
+						this.fsm.deharmonised();
+					}
+				}
+				break;
+			default: break;
+		}
+	}
+}
+
 class Tool {
 	constructor (inID, inName) {
 		this.toolID            = (inID) ? inID : 0;
@@ -328,6 +355,7 @@ class Tool {
 		this.area              = 0;
 		this.pointed_at_screen = false;
 		this.is_moving         = false;
+		this.moving_since      = 0;
 
 		// setup event listeners
 		window.addEventListener('tracker'+this.toolID+'update', this.update.bind(this), false);
@@ -357,6 +385,8 @@ class Tool {
 		if (this.is_moving != d.is_moving) {
 			this.is_moving = d.is_moving;
 			change = true;
+
+			this.moving_since = (this.is_moving) ? (new Date().getTime()) : 0;
 		}
 
 		// send out change event
