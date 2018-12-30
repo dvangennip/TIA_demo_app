@@ -325,10 +325,10 @@ class SituationShipWreck extends Situation {
 class SituationAlienShock extends Situation {
 	constructor (inAreaCode, inName, inTools) {
 		super(inAreaCode, inName, inTools, [
-				{ name: 'shocked',       from: 'arrest',    to: 'sparking'  },
+				{ name: 'shocked',       from: 'arrested',  to: 'sparking'  },
 				{ name: 'doubleshocked', from: 'sparking',  to: 'heartrate' },
-				{ name: 'arrested',      from: 'sparking',  to: 'arrest'    },
-				{ name: 'arrested',      from: 'heartrate', to: 'sparking'  }
+				{ name: 'arrest',        from: 'sparking',  to: 'arrested'  },
+				{ name: 'arrest',        from: 'heartrate', to: 'sparking'  }
 			], ['ts1', 'ts2']);
 	}
 
@@ -337,7 +337,7 @@ class SituationAlienShock extends Situation {
 			ts2 = this.tools['ts2'];
 
 		switch (this.fsm.state) {
-			case 'arrest':
+			case 'arrested':
 				if ((ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen) || (ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen)) {
 					this.fsm.shocked();
 				}
@@ -352,14 +352,14 @@ class SituationAlienShock extends Situation {
 						}
 					}
 				} else {
-					this.fsm.arrested()
+					this.fsm.arrest()
 				}
 				break;
 			case 'heartrate':
 				// continued shocks cause a new arrest
 				if (ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen && ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen) {
 					if (this.current_state_timestamp + 2000 < (new Date().getTime())) {
-						this.fsm.arrested();
+						this.fsm.arrest();
 					}
 				}
 				break;
