@@ -163,17 +163,9 @@ class Tracker {
 // ----------------------------------------------------------------------------
 
 /**
- * Starting point of the script
- * Call any class or function here that needs to ready from the start
- */
-var initialise = function () {
-	var mock = new MockTrackers();
-}
-
-/**
  * Wait for whole page to load before setting up.
  * Prevents problems with objects not loaded yet while trying to assign these.
  */
 window.addEventListener('pageshow', function () {
-	initialise();
+	window.mock = new MockTrackers();
 }, false);

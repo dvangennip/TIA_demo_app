@@ -106,7 +106,7 @@ class MainLogic {
 		this.sShip        = new SituationShipWreck(   1, 'ship_wreck',   this.tools);
 		this.sAlienShock  = new SituationAlienShock(  2, 'alien_shock',  this.tools);
 		this.sAlienBreath = new SituationAlienBreath( 3, 'alien_breath', this.tools);
-		this.sGuide       = new SituationGuide(       4, 'hitch_guide',  this.tools);
+		this.sGuide       = new SituationGuide(       4, 'guide',        this.tools);
 
 		// check existence of nextMessage function to avoid reference errors
 		if (typeof nextMessage === 'function') {
@@ -224,7 +224,7 @@ class Situation {
 		this.el = Element.make('div', {
 			'class': inName.replace('_','-'), // just following convention of using - instead of _
 			'id': inName,
-			'innerHTML': inName
+			'innerHTML': '' //inName
 		})
 		document.getElementsByTagName('body')[0].appendChild(this.el);
 
@@ -328,7 +328,7 @@ class SituationAlienShock extends Situation {
 				{ name: 'shocked',       from: 'arrest',    to: 'sparking'  },
 				{ name: 'doubleshocked', from: 'sparking',  to: 'heartrate' },
 				{ name: 'arrested',      from: 'sparking',  to: 'arrest'    },
-				{ name: 'halfarrested',  from: 'heartrate', to: 'sparking'  }
+				{ name: 'arrested',      from: 'heartrate', to: 'sparking'  }
 			], ['ts1', 'ts2']);
 	}
 
@@ -359,7 +359,7 @@ class SituationAlienShock extends Situation {
 				// continued shocks cause a new arrest
 				if (ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen && ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen) {
 					if (this.current_state_timestamp + 2000 < (new Date().getTime())) {
-						this.fsm.halfarrested();
+						this.fsm.arrested();
 					}
 				}
 				break;
@@ -420,6 +420,18 @@ class SituationGuide extends Situation {
 				{ name: 'open',  from: 'closed', to: 'opened' },
 				{ name: 'close', from: 'opened', to: 'closed' },
 			], ['tm1', 'tm2']);
+
+		this.frame_el = Element.make('div', {
+			'class': 'magnified-frame',
+			'id': inName + '_frame'
+		});
+		this.frame_inner_el = Element.make('div', {
+			'class': 'magnified-inner-frame',
+			'id': inName + '_inner_frame',
+			'innerHTML': document.getElementById('guide_text_store').innerHTML
+		});
+		this.el.appendChild(this.frame_el);
+		this.frame_el.appendChild(this.frame_inner_el);
 	}
 
 	update (inEvent) {
@@ -437,9 +449,11 @@ class SituationGuide extends Situation {
 					// if either, remain in state
 					// if both, let people browse the guide
 					if (tm1.area == 4 && tm1.close_to_screen && tm1.pointed_at_screen && tm2.area == 4 && tm2.close_to_screen && tm2.pointed_at_screen) {
-						// if at least one is moving, use this for positioning
-						// console.log(tm1.moving_shift, tm2.moving_shift);
-						// TODO
+						// use positions for translating the guide text in x direction
+						let avg_position = (tm1.pos + tm2.pos) / 2;
+						let translation  = avg_position - (this.el.offsetLeft + (this.el.offsetWidth / 2));
+						
+						this.frame_inner_el.style.transform = 'translate(' + translation + 'px, 0px)';
 					}
 				} else {
 					this.fsm.close();

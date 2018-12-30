@@ -55,7 +55,7 @@ body {
 }
 
 body.arena {
-	background: #000000 url(assets/landscape_background.png);
+	background: #000000 url(assets/landscape_background.png) no-repeat;
 	height: 1200px;  /* Huge dimentions for the data arena screen */
 	width: 10080px;
 }
@@ -70,7 +70,11 @@ body.mock {
 	}
 }
 
-.ship-wreck, .alien-shock, .alien-breath, .hitch-guide {
+.hidden {
+	display: none;
+}
+
+.ship-wreck, .alien-shock, .alien-breath, .guide {
 	background: #555;
 	position: absolute;
 	height: 500px;
@@ -78,6 +82,9 @@ body.mock {
 	z-index: 1;
 	top: 450px;
 	left: 1010px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .active {
@@ -121,15 +128,56 @@ body.mock {
 	background: #5f5;
 }
 
-.hitch-guide {
+.guide {
 	left: 8570px;
 }
-.hitch-guide.closed {
+.guide.closed {
 	background: #555;
 }
-.hitch-guide.opened {
+.guide.opened {
 	background: #ff5;
 }
+
+.magnified-frame {
+	background: #cca;
+	display: none;
+	height: 90%;
+	width: 90%;
+	display: none;
+	overflow: hidden;
+	justify-content: flex-start;
+	align-items: stretch;
+}
+
+.opened > .magnified-frame {
+	display: flex;
+}
+
+.magnified-inner-frame {
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+}
+
+.magnified-inner-frame > div {
+	min-width: 300px;
+	padding: 1em;
+}
+
+.magnified-inner-frame > div > h2, .magnified-inner-frame > div > p {
+	color: #222;
+	margin-bottom: 0.5em;
+}
+
+.magnified-inner-frame > div> h2 {
+	font-weight: bold;
+}
+
+emphasis {
+	font-style: italic;
+}
+
+/* Mock tracker elements */
 
 .tracker {
 	background: #333;
