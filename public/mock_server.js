@@ -47,10 +47,7 @@ const server = http.createServer((request, response) => {
 		let outcome = 200;
 
 		// return a static file
-		let filename = (id.length !== 0) ? id : '/index.html',
-		lastSlash = filename.lastIndexOf('/'),
-		lastPeriod = filename.lastIndexOf('.');
-		if (lastPeriod === -1 || lastPeriod < lastSlash) filename += '/index.html';
+		let filename = (id.length !== 0) ? id : 'index.html';
 
 		fs.readFile(filename, function(error, data) {
 			if (error) {
