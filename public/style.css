@@ -101,12 +101,12 @@ body.mock {
 	background: #333;
 }
 
-
 .alien-shock {
 	left: 3530px;
 }
 .alien-shock.arrested {
 	background: #555;
+	background: url(assets/cube-animated.gif) no-repeat center center;
 }
 .alien-shock.sparking {
 	background: #43f;
