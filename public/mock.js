@@ -69,11 +69,10 @@ class Tracker {
 			'r' : 0, // r represents radius from centre
 			'ap': 0  // angle in polar coordinates (radians)
 		},
-		this.actionKey         = 'a',
-		this.is_moving         = false;
-		this.pointed_at_screen = false;
-		this.close_to_screen   = false,
-		this.area              = 1
+		this.is_moving         = 1;
+		this.pointed_at_screen = 0;
+		this.close_to_screen   = 0;
+		this.area              = 1;
 
 		// setup display element
 		this.el = document.getElementById(id);
@@ -92,7 +91,7 @@ class Tracker {
 				x: this.position.x - inEvent.clientX,
 				y: this.position.y - inEvent.clientY
 			};
-			this.is_moving = true;
+			this.is_moving = 1;
 		}
 		if (this.dragActive && inEvent.type === 'mouseup') {
 			this.dragActive = false;
@@ -100,7 +99,7 @@ class Tracker {
 
 			// cancel is_moving some time after last movement was recorded
 			setTimeout(function () {
-				this.is_moving = false;
+				this.is_moving = 0;
 				this.updateActionKey();
 			}.bind(this), 2500);
 		}
@@ -133,26 +132,12 @@ class Tracker {
 
 			this.position.s = Math.round(this.position.ap / (2*Math.PI) * 10080);
 
-			// update actionKey
-			this.pointed_at_screen = (this.position.r > 0.75 && this.position.r < 1.02); // very rough approximation
-			this.updateActionKey();
-		}
-	}
-
-	updateActionKey () {
-		if (!this.is_moving && !this.pointed_at_screen) {
-			this.actionKey = 'a';
-		} else if (!this.is_moving && this.pointed_at_screen) {
-			this.actionKey = 'b';
-		} else if (this.is_moving && !this.pointed_at_screen) {
-			this.actionKey = 'c';
-		} else if (this.is_moving && this.pointed_at_screen) {
-			this.actionKey = 'd';
+			this.pointed_at_screen = (this.position.r > 0.75 && this.position.r < 1.02) ? 1 : 0; // very rough approximation
 		}
 	}
 
 	getData () {
-		return [this.num, this.actionKey, this.position.s, this.close_to_screen, this.area].join(',');
+		return [this.num, this.is_moving, this.pointed_at_screen, this.position.s, this.close_to_screen, this.area].join(',');
 	}
 
 	mapValue (inValue, inMin, inMax, outMin, outMax) {

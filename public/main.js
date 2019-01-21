@@ -1,6 +1,7 @@
 'use strict';
 
-const version = '0.0.1';
+const version = '0.0.2';
+const debug   = true;
 
 /**
 some notes:
@@ -15,19 +16,27 @@ function updateMessages (xhr, status, args) {
 	//      example: 1,a,7583,0,2
 	let d = args.data;
 	let td = d.split('-');
+
+	if (debug) {
+		document.getElementById('debug_info_tracker').innerHTML = d.toString();
+	}
+
+
 	for (var i = td.length - 1; i >= 0; i--) {
 		td[i] = td[i].split(',')
 
 		// convert to useful data format
 		let trackerData = {
 			'id'       : parseInt(td[i][0], 10),
-			//'actionKey': td[i][1],
-			'is_moving': (td[i][1] == 'c' || td[i][1] == 'd') ? true : false,
-			'pointed'  : (td[i][1] == 'b' || td[i][1] == 'd') ? true : false,
-			'x'        : parseInt(td[i][2], 10),
-			'close'    : (td[i][3] == '1') ? true : false,
-			'area'     : parseInt(td[i][4], 10)
+			'is_moving': (parseInt(td[i][1], 10) == 1) ? true : false,
+			'pointed'  : (parseInt(td[i][2], 10) == 1) ? true : false,
+			'x'        : parseInt(td[i][3], 10),
+			'close'    : (parseInt(td[i][4], 10) == 1) ? true : false,
+			'area'     : parseInt(td[i][5], 10)
 		};
+		if (debug) {
+			document.getElementById('debug_info_tracker').innerHTML += '<br/>' + JSON.stringify(trackerData);
+		}
 
 		// send out custom event to be subscribed to by other elements on the page
 		let trackerEvent = new CustomEvent('tracker'+trackerData['id']+'update', {detail: trackerData});
@@ -89,6 +98,11 @@ Element.prototype.insertAfter = function (newchild) {
 
 class MainLogic {
 	constructor () {
+		// setup debug pane if needed
+		if (debug) {
+			document.getElementById('debug_info').removeClass('hidden');
+		}
+
 		// initiate all tools
 		this.tools = {
 			'tm1': new Tool(1, 'tm1'),
@@ -102,7 +116,10 @@ class MainLogic {
 		}
 
 		// initiate all situations
-		//this.environment = new Environment();
+		if (!debug) {
+			// exclude this when debugging as it gets annoying
+			this.environment = new Environment();
+		}
 		this.sShip        = new SituationShipWreck(   1, 'ship_wreck',   this.tools);
 		this.sAlienShock  = new SituationAlienShock(  2, 'alien_shock',  this.tools);
 		this.sAlienBreath = new SituationAlienBreath( 3, 'alien_breath', this.tools);
