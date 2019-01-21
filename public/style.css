@@ -82,11 +82,11 @@ body.mock {
 .ship-wreck, .alien-shock, .alien-breath, .guide {
 	background: #555;
 	position: absolute;
-	height: 600px;
-	width: 600px;
+	height: 800px;
+	width: 800px;
 	z-index: 1;
-	top: 450px;
-	left: 960px;
+	top: 200px;
+	left: 860px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -97,17 +97,20 @@ body.mock {
 }
 
 .ship-wreck.fire {
-	background: #f55;
+	/*background: #f55;*/
+	background: url(assets/ship_fire.png) no-repeat center center;
 }
 .ship-wreck.halffire {
-	background: #a55;
+	/*background: #a55;*/
+	background: url(assets/ship_smoke.png) no-repeat center center;
 }
 .ship-wreck.calm {
-	background: #333;
+	/*background: #333;*/
+	background: url(assets/ship_calm.png) no-repeat center center;
 }
 
 .alien-shock {
-	left: 3480px;
+	left: 3380px;
 }
 .alien-shock.arrested {
 	background: #555;
@@ -121,7 +124,7 @@ body.mock {
 }
 
 .alien-breath {
-	left: 6000px;
+	left: 5900px;
 }
 .alien-breath.nobreath {
 	background: #368;
@@ -134,7 +137,7 @@ body.mock {
 }
 
 .guide {
-	left: 8520px;
+	left: 8420px;
 }
 .guide.closed {
 	background: #555;

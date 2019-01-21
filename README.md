@@ -21,7 +21,7 @@ The project was funded by a UTS Data Arena Research Exhibit Grant 2017 for the c
 There are two ways of running the code. The first assumes the use of a mock page to generate tracker input that is then fed to the arena view via an intermediary webserver. The second way of running uses the Data Arena and cannot be replicated outside of that environment.
 
 ### Using the mock tracker page
-Start the [node.js][7] server first with
+Start the [node.js][2] server first with
 
 	$ node mock_server.js
 
@@ -29,6 +29,19 @@ Then open `[http://localhost:3000/mock.html][2]` in your webbrowser so you’re 
 
 ### Using the Data Arena
 **TBD**
+
+## Development notes
+
+### Generating animated PNGs
+Use [apngasm][3] to generate an animated PNG file from a sequence of still images (the most suitable output from your preferred animation software, like Blender).
+
+On a Mac, it’s easy to install using homebrew:
+
+	$ brew install apngasm
+
+Using it goes as follows when the input files are intended as a 24 fps animation:
+
+	$ apngasm -o output.png *.png 1:24
 
 ## Limitations and known issues
 **TBD**
@@ -42,9 +55,8 @@ Then open `[http://localhost:3000/mock.html][2]` in your webbrowser so you’re 
 - [Audio from NASA’s Mars InSight pressure sensor while deployed on Mars][6]
 
 [1]:	https://www.uts.edu.au/partners-and-community/data-arena/overview
-[2]:	http://localhost:3000/mock.html
-[3]:	http://localhost:3000/index.html
+[2]:	https://nodejs.org/en/
+[3]:	https://github.com/apngasm/apngasm
 [4]:	https://github.com/jakesgordon/javascript-state-machine
 [5]:	https://freesound.org/
 [6]:	https://www.nasa.gov/connect/sounds/index.html
-[7]:	https://nodejs.org/en/
