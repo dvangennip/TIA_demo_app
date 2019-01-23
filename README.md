@@ -32,8 +32,15 @@ Then open `[http://localhost:3000/mock.html][2]` in your webbrowser so you’re 
 
 ## Development notes
 
+### Animating and rendering
+We used Blender 2.8 for all animation work. Because it’s just used to generate a series of images, any software will do.
+
+Here’s [a note to deal with View Layers in Blender 2.8][3] and how to exclude some from rendering (while still affecting the parts shown): set a collection’s View Layer option to `Set Holdout` to render it transparent. This only worked with Cycles, not EEVEE, at the time of writing.
+
+Also, make sure the Film settings have transparency enabled and that the output is RGBA to include the alpha transparency value.
+
 ### Generating animated PNGs
-Use [apngasm][3] to generate an animated PNG file from a sequence of still images (the most suitable output from your preferred animation software, like Blender).
+Use [apngasm][4] to generate an animated PNG file from a sequence of still images (the most suitable output from your preferred animation software, like Blender).
 
 On a Mac, it’s easy to install using homebrew:
 
@@ -50,13 +57,14 @@ Using it goes as follows when the input files are intended as a 24 fps animation
 **TBD**
 
 ## Assets and code used from third parties
-- [Javascript State Machine][4] by jakesgordon (MIT license)
-- Audio samples from [Freesound.org][5] (CC0 license)
-- [Audio from NASA’s Mars InSight pressure sensor while deployed on Mars][6]
+- [Javascript State Machine][5] by jakesgordon (MIT license)
+- Audio samples from [Freesound.org][6] (CC0 license)
+- [Audio from NASA’s Mars InSight pressure sensor while deployed on Mars][7]
 
 [1]:	https://www.uts.edu.au/partners-and-community/data-arena/overview
 [2]:	https://nodejs.org/en/
-[3]:	https://github.com/apngasm/apngasm
-[4]:	https://github.com/jakesgordon/javascript-state-machine
-[5]:	https://freesound.org/
-[6]:	https://www.nasa.gov/connect/sounds/index.html
+[3]:	https://blender.stackexchange.com/questions/126289/blender-2-8-multiple-view-layers
+[4]:	https://github.com/apngasm/apngasm
+[5]:	https://github.com/jakesgordon/javascript-state-machine
+[6]:	https://freesound.org/
+[7]:	https://www.nasa.gov/connect/sounds/index.html

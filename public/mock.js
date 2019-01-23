@@ -4,14 +4,14 @@ class MockTrackers {
 	constructor () {
 		// link tracker objects
 		this.trackers = [
-			new Tracker(this, 1, 'tm1'),
-			new Tracker(this, 2, 'tm2'),
+			new Tracker(this, 1, 'tw1'),
+			new Tracker(this, 2, 'tw2'),
 			new Tracker(this, 3, 'ts1'),
 			new Tracker(this, 4, 'ts2'),
 			new Tracker(this, 5, 'tr1'),
 			new Tracker(this, 6, 'tr2'),
-			new Tracker(this, 7, 'tw1'),
-			new Tracker(this, 8, 'tw2')
+			new Tracker(this, 7, 'tm1'),
+			new Tracker(this, 8, 'tm2')
 		];
 
 		this.activeElements = [];

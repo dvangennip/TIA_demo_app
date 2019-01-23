@@ -21,26 +21,29 @@ function updateMessages (xhr, status, args) {
 		document.getElementById('debug_info_tracker').innerHTML = d.toString();
 	}
 
+	// iterate over all trackers
+	for (var i = 0; i < td.length; i++) {
+		// filter out any empty strings that hold no useful data
+		if (td[i].length > 0) {
+			td[i] = td[i].split(',')
 
-	for (var i = td.length - 1; i >= 0; i--) {
-		td[i] = td[i].split(',')
+			// convert to useful data format
+			let trackerData = {
+				'id'       : parseInt(td[i][0], 10),
+				'is_moving': (parseInt(td[i][1], 10) == 1) ? true : false,
+				'pointed'  : (parseInt(td[i][2], 10) == 1) ? true : false,
+				'x'        : parseInt(td[i][3], 10),
+				'close'    : (parseInt(td[i][4], 10) == 1) ? true : false,
+				'area'     : parseInt(td[i][5], 10)
+			};
+			if (debug) {
+				document.getElementById('debug_info_tracker').innerHTML += '<br/>' + JSON.stringify(trackerData);
+			}
 
-		// convert to useful data format
-		let trackerData = {
-			'id'       : parseInt(td[i][0], 10),
-			'is_moving': (parseInt(td[i][1], 10) == 1) ? true : false,
-			'pointed'  : (parseInt(td[i][2], 10) == 1) ? true : false,
-			'x'        : parseInt(td[i][3], 10),
-			'close'    : (parseInt(td[i][4], 10) == 1) ? true : false,
-			'area'     : parseInt(td[i][5], 10)
-		};
-		if (debug) {
-			document.getElementById('debug_info_tracker').innerHTML += '<br/>' + JSON.stringify(trackerData);
+			// send out custom event to be subscribed to by other elements on the page
+			let trackerEvent = new CustomEvent('tracker'+trackerData['id']+'update', {detail: trackerData});
+			window.dispatchEvent(trackerEvent);
 		}
-
-		// send out custom event to be subscribed to by other elements on the page
-		let trackerEvent = new CustomEvent('tracker'+trackerData['id']+'update', {detail: trackerData});
-		window.dispatchEvent(trackerEvent);
 	}
 }
 
@@ -105,14 +108,14 @@ class MainLogic {
 
 		// initiate all tools
 		this.tools = {
-			'tm1': new Tool(1, 'tm1'),
-			'tm2': new Tool(2, 'tm2'),
+			'tw1': new Tool(1, 'tw1'),
+			'tw2': new Tool(2, 'tw2'),
 			'ts1': new Tool(3, 'ts1'),
 			'ts2': new Tool(4, 'ts2'),
 			'tr1': new Tool(5, 'tr1'),
 			'tr2': new Tool(6, 'tr2'),
-			'tw1': new Tool(7, 'tw1'),
-			'tw2': new Tool(8, 'tw2')
+			'tm1': new Tool(7, 'tm1'),
+			'tm2': new Tool(8, 'tm2')
 		}
 
 		// initiate all situations
@@ -421,7 +424,7 @@ class SituationAlienBreath extends Situation {
 			case 'breathing':
 				// continued harmonising causes new disharmony
 				if (tr1.area == 3 && tr1.close_to_screen && tr1.is_moving && tr2.area == 3 && tr2.close_to_screen && tr2.is_moving) {
-					if (this.current_state_timestamp + 5000 < (new Date().getTime())) {
+					if (this.current_state_timestamp + 6000 < (new Date().getTime())) {
 						this.fsm.deharmonised();
 					}
 				}
