@@ -237,8 +237,10 @@ class Environment {
 
 class Situation {
 	constructor (inAreaCode, inName, inTools, inTransitions, inEvents) {
-		this.areaCode = inAreaCode;
-		this.tools = inTools;
+		this.areaCode    = inAreaCode;
+		this.tools       = inTools;
+		this.timeout     = 0;
+		this.updateDelay = 1000;
 
 		// define onscreen element
 		this.el = Element.make('div', {
@@ -437,8 +439,10 @@ class SituationAlienBreath extends Situation {
 class SituationGuide extends Situation {
 	constructor (inAreaCode, inName, inTools) {
 		super(inAreaCode, inName, inTools, [
-				{ name: 'open',  from: 'closed', to: 'opened' },
-				{ name: 'close', from: 'opened', to: 'closed' },
+				{ name: 'open',  from: 'closed',  to: 'opening' },
+				{ name: 'open',  from: 'opening', to: 'opened' },
+				{ name: 'close', from: 'opened',  to: 'closing' },
+				{ name: 'close', from: 'closing', to: 'closed' },
 			], ['tm1', 'tm2']);
 
 		this.frame_el = Element.make('div', {
@@ -459,9 +463,25 @@ class SituationGuide extends Situation {
 			tm2 = this.tools['tm2'];
 
 		switch (this.fsm.state) {
+			case 'closing':
+				if (this.timeout == 0) {
+					this.timeout = setTimeout(function () {
+						this.timeout = 0;
+						this.fsm.close();
+					}.bind(this), 1500 - this.updateDelay);
+				}
+				break;
 			case 'closed':
 				if ((tm1.area == 4 && tm1.close_to_screen && tm1.pointed_at_screen) || (tm2.area == 4 && tm2.close_to_screen && tm2.pointed_at_screen)) {
 					this.fsm.open();
+				}
+				break;
+			case 'opening':
+				if (this.timeout == 0) {
+					this.timeout = setTimeout(function () {
+						this.timeout = 0;
+						this.fsm.open();
+					}.bind(this), 1500 - this.updateDelay);
 				}
 				break;
 			case 'opened':

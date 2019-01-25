@@ -48,14 +48,14 @@ a img {
 /* Common elements */
 
 body {
-	color: #fff;
+	color: #000;
 	font-family: "Georgia", serif;
 	font-size: 100%;
 	line-height: 1.4;
 }
 
 body.arena {
-	background: #000000 url(assets/landscape_background.png) no-repeat;
+	background: #000 url(assets/landscape_background.png) no-repeat;
 	height: 1200px;  /* Huge dimentions for the data arena screen */
 	width: 10080px;
 }
@@ -140,21 +140,28 @@ body.mock {
 	left: 8420px;
 }
 .guide.closed {
-	background: #555;
+	background: url(assets/guide_closed.png) no-repeat center center;
 }
 .guide.opened {
-	background: #ff5;
+	background: url(assets/guide_open.png) no-repeat center center;
+}
+.guide.opening {
+	background: url(assets/guide_opening.png) no-repeat center center;	
+}
+.guide.closing {
+	background: url(assets/guide_closing.png) no-repeat center center;	
 }
 
 .magnified-frame {
-	background: #cca;
 	display: none;
-	height: 90%;
-	width: 90%;
+	height: 82%;
+	width: 55%;
 	display: none;
 	overflow: hidden;
 	justify-content: flex-start;
 	align-items: stretch;
+	margin-left: 35px;
+	margin-top: -58px;
 }
 
 .opened > .magnified-frame {
@@ -168,7 +175,7 @@ body.mock {
 }
 
 .magnified-inner-frame > div {
-	min-width: 300px;
+	min-width: 395px;
 	padding: 1em;
 }
 

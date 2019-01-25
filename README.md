@@ -30,6 +30,15 @@ Then open `[http://localhost:3000/mock.html][2]` in your webbrowser so you’re 
 ### Using the Data Arena
 **TBD**
 
+#### Opening a properly sized browser window
+By default, a browser window in the arena doesn't fit the whole screen and requires manual resizing. There is however an easier way to get a window with the right size.
+
+Open a new window and make sure you're not on a webpage (a blank page will do, like `about:blank`). These pages give additional privileges not affording to regular webpages. Then call the following command from the console terminal (needs the developer window to be open):
+
+    > window.open('/', 'arena', 'left=50,top=0,width=10485,height=1200,titlebar=no');
+
+There is also an `arena.html` file included which attempts to call the above, although reduced privileges may still result in a visible title bar and location bar. Look for settings labelled `*window_open*` in `about:config` if you'd like to disable some preventive measures.
+
 ## Development notes
 
 ### Animating and rendering
@@ -48,7 +57,9 @@ On a Mac, it’s easy to install using homebrew:
 
 Using it goes as follows when the input files are intended as a 24 fps animation:
 
-	$ apngasm -o output.png *.png 1:24
+	$ apngasm -d 1:24 -o output.png *.png
+
+If the final frame should persist for a longer period, simply specifying a delay at the end will apply to the last frame (that is, adding `1:1` at the end sets the last frame for 1 second).
 
 ## Limitations and known issues
 **TBD**
