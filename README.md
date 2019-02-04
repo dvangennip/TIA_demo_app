@@ -59,7 +59,7 @@ Using it goes as follows when the input files are intended as a 24 fps animation
 
 	$ apngasm -d 1:24 -o output.png *.png
 
-If the final frame should persist for a longer period, simply specifying a delay at the end will apply to the last frame (that is, adding `1:1` at the end sets the last frame for 1 second).
+If the final frame should persist for a longer period, simply specifying a delay at the end will apply to the last frame (that is, adding `1:1` at the end sets the last frame for 1 second). To avoid a looping animation, specify `-l 1` to get just a single loop of the animation.
 
 ## Limitations and known issues
 **TBD**

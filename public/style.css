@@ -73,6 +73,7 @@ body.mock {
 #debug_info {
 	font-family: monospace;
 	font-size: 130%;
+	color: #fff;
 }
 
 .hidden {
@@ -97,15 +98,24 @@ body.mock {
 }
 
 .ship-wreck.fire {
-	/*background: #f55;*/
 	background: url(assets/ship_fire.png) no-repeat center center;
 }
-.ship-wreck.halffire {
-	/*background: #a55;*/
+.ship-wreck.fire_to_smoke {
+	background: url(assets/ship_fire_to_smoke.png) no-repeat center center;
+}
+.ship-wreck.smoke_to_fire {
+	background: url(assets/ship_smoke_to_fire.png) no-repeat center center;
+}
+.ship-wreck.smoke {
 	background: url(assets/ship_smoke.png) no-repeat center center;
 }
+.ship-wreck.smoke_to_calm {
+	background: url(assets/ship_smoke_to_calm.png) no-repeat center center;
+}
+.ship-wreck.calm_to_smoke {
+	background: url(assets/ship_calm_to_smoke.png) no-repeat center center;
+}
 .ship-wreck.calm {
-	/*background: #333;*/
 	background: url(assets/ship_calm.png) no-repeat center center;
 }
 
@@ -196,6 +206,7 @@ emphasis {
 
 .tracker {
 	background: #333;
+	color: #fff;
 	height: 32px;
 	width: 32px;
 	display: block;
