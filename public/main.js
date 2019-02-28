@@ -383,10 +383,12 @@ class SituationShipWreck extends Situation {
 class SituationAlienShock extends Situation {
 	constructor (inAreaCode, inName, inTools) {
 		super(inAreaCode, inName, inTools, [
-				{ name: 'shocked',       from: 'arrested',  to: 'sparking'  },
-				{ name: 'doubleshocked', from: 'sparking',  to: 'heartrate' },
-				{ name: 'arrest',        from: 'sparking',  to: 'arrested'  },
-				{ name: 'arrest',        from: 'heartrate', to: 'sparking'  }
+				{ name: 'shocked', from: 'arrested',     to: 'halfsparking' },
+				{ name: 'shocked', from: 'halfsparking', to: 'sparking'     },
+				{ name: 'shocked', from: 'sparking',     to: 'heartrate'    },
+				{ name: 'arrest',  from: 'heartrate',    to: 'sparking'     },
+				{ name: 'arrest',  from: 'sparking',     to: 'halfsparking' },
+				{ name: 'arrest',  from: 'halfsparking', to: 'arrested'     }
 			], ['ts1', 'ts2']);
 	}
 
@@ -400,13 +402,26 @@ class SituationAlienShock extends Situation {
 					this.fsm.shocked();
 				}
 				break;
+			case 'halfsparking':
+				if ((ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen) || (ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen)) {
+					// if either, remain in state
+					// if both, move on if in this state for some time
+					if (ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen && ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen) {
+						if (this.current_state_timestamp + 2000 < (new Date().getTime())) {
+							this.fsm.shocked();
+						}
+					}
+				} else {
+					this.fsm.arrest()
+				}
+				break;
 			case 'sparking':
 				if ((ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen) || (ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen)) {
 					// if either, remain in state
 					// if both, move on if in this state for some time
 					if (ts1.area == 2 && ts1.close_to_screen && ts1.pointed_at_screen && ts2.area == 2 && ts2.close_to_screen && ts2.pointed_at_screen) {
 						if (this.current_state_timestamp + 3000 < (new Date().getTime())) {
-							this.fsm.doubleshocked();
+							this.fsm.shocked();
 						}
 					}
 				} else {

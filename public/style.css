@@ -123,14 +123,16 @@ body.mock {
 	left: 3380px;
 }
 .alien-shock.arrested {
-	background: #555;
-	background: url(assets/cube-animated.gif) no-repeat center center;
+	background: url(assets/alien1_arrested.png) no-repeat center center;
+}
+.alien-shock.halfsparking {
+	background: url(assets/alien1_halfsparking.png) no-repeat center center;
 }
 .alien-shock.sparking {
-	background: #43f;
+	background: url(assets/alien1_sparking.png) no-repeat center center;
 }
 .alien-shock.heartrate {
-	background: #94f;
+	background: url(assets/alien1_heartrate.png) no-repeat center center;
 }
 
 .alien-breath {
