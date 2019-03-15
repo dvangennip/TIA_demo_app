@@ -304,14 +304,10 @@ class Situation {
 class SituationShipWreck extends Situation {
 	constructor (inAreaCode, inName, inTools) {
 		super(inAreaCode, inName, inTools, [
-				{ name: 'extinguish', from: 'fire',          to: 'fire_to_smoke' },
-				{ name: 'extinguish', from: 'fire_to_smoke', to: 'smoke'         },
-				{ name: 'extinguish', from: 'smoke',         to: 'smoke_to_calm' },
-				{ name: 'extinguish', from: 'smoke_to_calm', to: 'calm'          },
-				{ name: 'flareup',    from: 'calm',          to: 'calm_to_smoke' },
-				{ name: 'flareup',    from: 'calm_to_smoke', to: 'smoke'         },
-				{ name: 'flareup',    from: 'smoke',         to: 'smoke_to_fire' },
-				{ name: 'flareup',    from: 'smoke_to_fire', to: 'fire'          }
+				{ name: 'extinguish', from: 'fire',          to: 'smoke' },
+				{ name: 'extinguish', from: 'smoke',         to: 'calm'  },
+				{ name: 'flareup',    from: 'calm',          to: 'smoke' },
+				{ name: 'flareup',    from: 'smoke',         to: 'fire'  },
 			], ['tw1', 'tw2', 'ts1', 'ts2']);
 	}
 
@@ -328,22 +324,22 @@ class SituationShipWreck extends Situation {
 					this.fsm.extinguish();
 				}
 				break;
-			case 'fire_to_smoke':
-				if (this.timeout == 0) {
-					this.timeout = setTimeout(function () {
-						this.timeout = 0;
-						this.fsm.extinguish();
-					}.bind(this), 1500 - this.updateDelay);
-				}
-				break;
-			case 'smoke_to_fire':
-				if (this.timeout == 0) {
-					this.timeout = setTimeout(function () {
-						this.timeout = 0;
-						this.fsm.flareup();
-					}.bind(this), 1500 - this.updateDelay);
-				}
-				break;
+			// case 'fire_to_smoke':
+			// 	if (this.timeout == 0) {
+			// 		this.timeout = setTimeout(function () {
+			// 			this.timeout = 0;
+			// 			this.fsm.extinguish();
+			// 		}.bind(this), 1500 - this.updateDelay);
+			// 	}
+			// 	break;
+			// case 'smoke_to_fire':
+			// 	if (this.timeout == 0) {
+			// 		this.timeout = setTimeout(function () {
+			// 			this.timeout = 0;
+			// 			this.fsm.flareup();
+			// 		}.bind(this), 1500 - this.updateDelay);
+			// 	}
+			// 	break;
 			case 'smoke':
 				if (tw1.area == 1 && tw1.close_to_screen && tw1.pointed_at_screen && tw2.is_moving) {
 					// do nothing, unless we've been in this state for 5+ seconds
@@ -354,22 +350,22 @@ class SituationShipWreck extends Situation {
 					this.fsm.flareup();
 				}
 				break;
-			case 'smoke_to_calm':
-				if (this.timeout == 0) {
-					this.timeout = setTimeout(function () {
-						this.timeout = 0;
-						this.fsm.extinguish();
-					}.bind(this), 1500 - this.updateDelay);
-				}
-				break;
-			case 'calm_to_smoke':
-				if (this.timeout == 0) {
-					this.timeout = setTimeout(function () {
-						this.timeout = 0;
-						this.fsm.flareup();
-					}.bind(this), 1500 - this.updateDelay);
-				}
-				break;
+			// case 'smoke_to_calm':
+			// 	if (this.timeout == 0) {
+			// 		this.timeout = setTimeout(function () {
+			// 			this.timeout = 0;
+			// 			this.fsm.extinguish();
+			// 		}.bind(this), 1500 - this.updateDelay);
+			// 	}
+			// 	break;
+			// case 'calm_to_smoke':
+			// 	if (this.timeout == 0) {
+			// 		this.timeout = setTimeout(function () {
+			// 			this.timeout = 0;
+			// 			this.fsm.flareup();
+			// 		}.bind(this), 1500 - this.updateDelay);
+			// 	}
+			// 	break;
 			case 'calm':
 				if (ts1.area == 1 && ts1.area == ts2.area && ts1.close_to_screen && ts2.close_to_screen && ts1.pointed_at_screen && ts2.pointed_at_screen) {
 					this.fsm.flareup();
@@ -445,11 +441,11 @@ class SituationAlienBreath extends Situation {
 	constructor (inAreaCode, inName, inTools) {
 		super(inAreaCode, inName, inTools, [
 				{ name: 'rattled',      from: 'nobreath',       to: 'halfdisharmony' },
-				{ name: 'rattled',      from: 'halfdisharmony', to: 'disharmony' },
-				{ name: 'rattled',      from: 'disharmony',     to: 'breathing'  },
-				{ name: 'deharmonised', from: 'breathing',      to: 'disharmony' },
+				{ name: 'rattled',      from: 'halfdisharmony', to: 'disharmony'     },
+				{ name: 'rattled',      from: 'disharmony',     to: 'breathing'      },
+				{ name: 'deharmonised', from: 'breathing',      to: 'disharmony'     },
 				{ name: 'deharmonised', from: 'disharmony',     to: 'halfdisharmony' },
-				{ name: 'deharmonised', from: 'halfdisharmony', to: 'nobreath'   }
+				{ name: 'deharmonised', from: 'halfdisharmony', to: 'nobreath'       }
 			], ['tr1', 'tr2']);
 	}
 
@@ -506,9 +502,9 @@ class SituationGuide extends Situation {
 	constructor (inAreaCode, inName, inTools) {
 		super(inAreaCode, inName, inTools, [
 				{ name: 'open',  from: 'closed',  to: 'opening' },
-				{ name: 'open',  from: 'opening', to: 'opened' },
+				{ name: 'open',  from: 'opening', to: 'opened'  },
 				{ name: 'close', from: 'opened',  to: 'closing' },
-				{ name: 'close', from: 'closing', to: 'closed' },
+				{ name: 'close', from: 'closing', to: 'closed'  },
 			], ['tm1', 'tm2']);
 
 		this.frame_el = Element.make('div', {
