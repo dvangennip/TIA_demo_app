@@ -139,7 +139,10 @@ body.mock {
 	left: 5900px;
 }
 .alien-breath.nobreath {
-	background: #368;
+	background: url(assets/alien2_nobreath.png) no-repeat center center;
+}
+.alien-breath.halfdisharmony {
+	background: url(assets/alien2_halfdisharmony.png) no-repeat center center;
 }
 .alien-breath.disharmony {
 	background: #936;

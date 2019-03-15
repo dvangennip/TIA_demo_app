@@ -444,10 +444,12 @@ class SituationAlienShock extends Situation {
 class SituationAlienBreath extends Situation {
 	constructor (inAreaCode, inName, inTools) {
 		super(inAreaCode, inName, inTools, [
-				{ name: 'rattled',      from: 'nobreath',   to: 'disharmony' },
-				{ name: 'harmonised',   from: 'disharmony', to: 'breathing'  },
-				{ name: 'deharmonised', from: 'disharmony', to: 'nobreath'   },
-				{ name: 'deharmonised', from: 'breathing',  to: 'disharmony' }
+				{ name: 'rattled',      from: 'nobreath',       to: 'halfdisharmony' },
+				{ name: 'rattled',      from: 'halfdisharmony', to: 'disharmony' },
+				{ name: 'rattled',      from: 'disharmony',     to: 'breathing'  },
+				{ name: 'deharmonised', from: 'breathing',      to: 'disharmony' },
+				{ name: 'deharmonised', from: 'disharmony',     to: 'halfdisharmony' },
+				{ name: 'deharmonised', from: 'halfdisharmony', to: 'nobreath'   }
 			], ['tr1', 'tr2']);
 	}
 
@@ -461,13 +463,26 @@ class SituationAlienBreath extends Situation {
 					this.fsm.rattled();
 				}
 				break;
+			case 'halfdisharmony':
+				if ((tr1.area == 3 && tr1.close_to_screen && tr1.is_moving) || (tr2.area == 3 && tr2.close_to_screen && tr2.is_moving)) {
+					// if either, remain in state
+					// if both, move on if in this state for some time
+					if (tr1.area == 3 && tr1.close_to_screen && tr1.is_moving && tr2.area == 3 && tr2.close_to_screen && tr2.is_moving) {
+						if (this.current_state_timestamp + 2000 < (new Date().getTime())) {
+							this.fsm.rattled();
+						}
+					}
+				} else {
+					this.fsm.deharmonised()
+				}
+				break;
 			case 'disharmony':
 				if ((tr1.area == 3 && tr1.close_to_screen && tr1.is_moving) || (tr2.area == 3 && tr2.close_to_screen && tr2.is_moving)) {
 					// if either, remain in state
 					// if both, move on if in this state for some time
 					if (tr1.area == 3 && tr1.close_to_screen && tr1.is_moving && tr2.area == 3 && tr2.close_to_screen && tr2.is_moving) {
 						if (this.current_state_timestamp + 5000 < (new Date().getTime())) {
-							this.fsm.harmonised();
+							this.fsm.rattled();
 						}
 					}
 				} else {
