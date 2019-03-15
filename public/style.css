@@ -145,10 +145,10 @@ body.mock {
 	background: url(assets/alien2_halfdisharmony.png) no-repeat center center;
 }
 .alien-breath.disharmony {
-	background: #936;
+	background: url(assets/alien2_disharmony.png) no-repeat center center;
 }
 .alien-breath.breathing {
-	background: #5f5;
+	background: url(assets/alien2_breathing.png) no-repeat center center;
 }
 
 .guide {
