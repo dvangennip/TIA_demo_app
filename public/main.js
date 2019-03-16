@@ -1,12 +1,7 @@
 'use strict';
 
-const version = '0.0.2';
+const version = '0.0.3';
 const debug   = true;
-
-/**
-some notes:
-- spatial audio: perhaps use https://github.com/goldfire/howler.js#documentation
-*/
 
 // ----------------------------------------------------------------------------
 
@@ -109,20 +104,17 @@ class MainLogic {
 		// initiate all tools
 		this.tools = {
 			'tw1': new Tool(1, 'tw1'),
-			'tw2': new Tool(2, 'tw2'),
-			'ts1': new Tool(3, 'ts1'),
-			'ts2': new Tool(4, 'ts2'),
-			'tr1': new Tool(5, 'tr1'),
-			'tr2': new Tool(6, 'tr2'),
+			'tw2': new Tool(2, 'tw2', 'assets/sound_fx_waterpump.mp3', ['is_moving']),
+			'ts1': new Tool(3, 'ts1', 'assets/sound_fx_electric.wav',  ['close_to_screen']),
+			'ts2': new Tool(4, 'ts2', 'assets/sound_fx_electric.wav',  ['close_to_screen']),
+			'tr1': new Tool(5, 'tr1', 'assets/sound_fx_rattle.wav',    ['is_moving']),
+			'tr2': new Tool(6, 'tr2', 'assets/sound_fx_rattle.wav',    ['is_moving']),
 			'tm1': new Tool(7, 'tm1'),
 			'tm2': new Tool(8, 'tm2')
 		}
 
 		// initiate all situations
-		if (!debug) {
-			// exclude this when debugging as it gets annoying
-			this.environment = new Environment();
-		}
+		this.environment  = new Environment();
 		this.sShip        = new SituationShipWreck(   1, 'ship_wreck',   this.tools);
 		this.sAlienShock  = new SituationAlienShock(  2, 'alien_shock',  this.tools);
 		this.sAlienBreath = new SituationAlienBreath( 3, 'alien_breath', this.tools);
@@ -151,7 +143,7 @@ class MainLogic {
 }
 
 class Tool {
-	constructor (inID, inName) {
+	constructor (inID, inName, inSound, inSoundConditions) {
 		this.toolID            = (inID) ? inID : 0;
 		this.toolName          = inName;
 		this.pos               = 0;
@@ -162,6 +154,17 @@ class Tool {
 		this.is_moving         = false;
 		this.moving_since      = 0;
 		this.moving_shift      = 0;
+
+		this.sound = undefined;
+		if (inSound) {
+			this.sound = new Howl({
+				src: inSound,
+				loop: true,
+				volume: 1
+			});
+
+			this.soundConditions = inSoundConditions;
+		}
 
 		// setup event listeners
 		window.addEventListener('tracker'+this.toolID+'update', this.update.bind(this), false);
@@ -214,29 +217,59 @@ class Tool {
 		}
 
 		// update state representation on screen
-		// TODO
+		// TODO IF RELEVANT
+
+		// update audio representation
+		if (this.sound) {
+			// first check if all conditions are satisfied
+			let conditions = true;
+
+			for (var i = this.soundConditions.length - 1; i >= 0; i--) {
+				if (!this[this.soundConditions[i]]) {
+					conditions = false;
+				}
+			}
+
+			// start or stop sound loop if conditions are (not) met
+			if (conditions) {
+				// for spatial sounds, updating the position is rquired
+				// this.sound.pos(x,y,z);
+				
+				if (!this.sound.playing()) {	
+					this.sound.play();
+				}
+			} else if (this.sound.playing()) {
+				this.sound.stop();
+			}
+		}
 	}
 }
 
 class Environment {
 	constructor () {
-		this.ambientAudio = Element.make('audio', {
-			'id': 'environment-audio',
-			'autoplay': true,
-			'loop': true
-		})
-		this.ambientSource = Element.make('source', {
-			'src': 'assets/sound_ambient.mp3',
-			'type': 'audio/wave'
-		})
-		this.ambientAudio.appendChild(this.ambientSource);
-		document.getElementsByTagName('body')[0].appendChild(this.ambientAudio);
-		this.ambientAudio.load();
+		// setup environment for event audio
+		Howler.pos(0, 0, 1.5); // x,y,z
+
+		// setup ambient audio
+		if (!debug) {
+			this.ambientAudio = Element.make('audio', {
+				'id': 'environment-audio',
+				'autoplay': true,
+				'loop': true
+			})
+			this.ambientSource = Element.make('source', {
+				'src': 'assets/sound_ambient.mp3',
+				'type': 'audio/wave'
+			})
+			this.ambientAudio.appendChild(this.ambientSource);
+			document.getElementsByTagName('body')[0].appendChild(this.ambientAudio);
+			this.ambientAudio.load();
+		}
 	}
 }
 
 class Situation {
-	constructor (inAreaCode, inName, inTools, inTransitions, inEvents) {
+	constructor (inAreaCode, inName, inTools, inTransitions, inSounds, inPos, inEvents) {
 		this.areaCode    = inAreaCode;
 		this.tools       = inTools;
 		this.timeout     = 0;
@@ -250,7 +283,20 @@ class Situation {
 		})
 		document.getElementsByTagName('body')[0].appendChild(this.el);
 
-		// setup finite state machine
+		// define audio elements
+		this.sounds = {};
+		for (var i = inSounds.length - 1; i >= 0; i--) {
+			// console.log(inSounds[i], inSounds[i]['name']);
+			this.sounds[ inSounds[i]['name'] ] = new Howl({
+				src: inSounds[i]['sound'],
+				loop: inSounds[i]['loop'],
+				volume: inSounds[i]['volume']
+			});
+			this.sounds[ inSounds[i]['name'] ].pos( inPos.x, inPos.y, inPos.z);
+			// this.sounds[ inSounds[i]['name'] ].pannerAttr({'rolloffFactor': 0});
+		}
+
+		// setup finite state machine (requires other parts to be setup first)
 		this.fsm = new StateMachine({
 			init: inTransitions[0].from,
 			transitions: inTransitions,
@@ -272,6 +318,7 @@ class Situation {
 
 	handleAfterTransition (lifecycle) {
 		// console.log(lifecycle.transition, lifecycle.from, lifecycle.to);
+
 		// set new state info
 		this.current_state_timestamp = (new Date()).getTime();
 
@@ -280,23 +327,11 @@ class Situation {
 		this.el.addClass(lifecycle.to);
 
 		// adjust audio
-		// TODO
-	}
-
-	playSound (name) {
-		// TODO create the necessary element before playing, only when necessary
-
-		switch (name) {
-			case 'gurgle-weak':
-				break;
-			case 'gurgle-strong':
-				break;
-			case 'zap-weak':
-				break;
-			case 'zap-strong':
-				break;
-			default:
-				break;
+		if (this.sounds[lifecycle.from] && this.sounds[lifecycle.from].playing()) {
+			this.sounds[lifecycle.from].stop();
+		}
+		if (this.sounds[lifecycle.to] && !this.sounds[lifecycle.to].playing()) {
+			this.sounds[lifecycle.to].play();
 		}
 	}
 }
@@ -308,7 +343,12 @@ class SituationShipWreck extends Situation {
 				{ name: 'extinguish', from: 'smoke',         to: 'calm'  },
 				{ name: 'flareup',    from: 'calm',          to: 'smoke' },
 				{ name: 'flareup',    from: 'smoke',         to: 'fire'  },
-			], ['tw1', 'tw2', 'ts1', 'ts2']);
+			], [
+				{ name: 'smoke', sound: 'assets/sound_fx_steam.mp3', volume: 1,   loop: true },
+				{ name: 'fire',  sound: 'assets/sound_fx_fire.mp3',  volume: 1.3, loop: true }
+			],
+			{ x: 1, y: 1, z: 1.5 },
+			['tw1', 'tw2', 'ts1', 'ts2']);
 	}
 
 	update (inEvent) {
@@ -324,22 +364,6 @@ class SituationShipWreck extends Situation {
 					this.fsm.extinguish();
 				}
 				break;
-			// case 'fire_to_smoke':
-			// 	if (this.timeout == 0) {
-			// 		this.timeout = setTimeout(function () {
-			// 			this.timeout = 0;
-			// 			this.fsm.extinguish();
-			// 		}.bind(this), 1500 - this.updateDelay);
-			// 	}
-			// 	break;
-			// case 'smoke_to_fire':
-			// 	if (this.timeout == 0) {
-			// 		this.timeout = setTimeout(function () {
-			// 			this.timeout = 0;
-			// 			this.fsm.flareup();
-			// 		}.bind(this), 1500 - this.updateDelay);
-			// 	}
-			// 	break;
 			case 'smoke':
 				if (tw1.area == 1 && tw1.close_to_screen && tw1.pointed_at_screen && tw2.is_moving) {
 					// do nothing, unless we've been in this state for 5+ seconds
@@ -350,22 +374,6 @@ class SituationShipWreck extends Situation {
 					this.fsm.flareup();
 				}
 				break;
-			// case 'smoke_to_calm':
-			// 	if (this.timeout == 0) {
-			// 		this.timeout = setTimeout(function () {
-			// 			this.timeout = 0;
-			// 			this.fsm.extinguish();
-			// 		}.bind(this), 1500 - this.updateDelay);
-			// 	}
-			// 	break;
-			// case 'calm_to_smoke':
-			// 	if (this.timeout == 0) {
-			// 		this.timeout = setTimeout(function () {
-			// 			this.timeout = 0;
-			// 			this.fsm.flareup();
-			// 		}.bind(this), 1500 - this.updateDelay);
-			// 	}
-			// 	break;
 			case 'calm':
 				if (ts1.area == 1 && ts1.area == ts2.area && ts1.close_to_screen && ts2.close_to_screen && ts1.pointed_at_screen && ts2.pointed_at_screen) {
 					this.fsm.flareup();
@@ -385,7 +393,13 @@ class SituationAlienShock extends Situation {
 				{ name: 'arrest',  from: 'heartrate',    to: 'sparking'     },
 				{ name: 'arrest',  from: 'sparking',     to: 'halfsparking' },
 				{ name: 'arrest',  from: 'halfsparking', to: 'arrested'     }
-			], ['ts1', 'ts2']);
+			], [
+				{ name: 'halfsparking', sound: 'assets/sound_fx_garbled_speech.mp3', volume: 0.9, loop: true },
+				{ name: 'sparking',     sound: 'assets/sound_fx_garbled_speech.mp3', volume: 0.9, loop: true },
+				{ name: 'heartrate',    sound: 'assets/sound_fx_heartbeat.mp3',      volume: 0.7, loop: true }
+			],
+			{ x: 1, y: -1, z: 1.5 },
+			['ts1', 'ts2']);
 	}
 
 	update (inEvent) {
@@ -446,7 +460,13 @@ class SituationAlienBreath extends Situation {
 				{ name: 'deharmonised', from: 'breathing',      to: 'disharmony'     },
 				{ name: 'deharmonised', from: 'disharmony',     to: 'halfdisharmony' },
 				{ name: 'deharmonised', from: 'halfdisharmony', to: 'nobreath'       }
-			], ['tr1', 'tr2']);
+			], [
+				{ name: 'nobreath',       sound: 'assets/sound_fx_wheeze1.mp3', volume: 0.05, loop: true },
+				{ name: 'halfdisharmony', sound: 'assets/sound_fx_wheeze1.mp3', volume: 0.3,  loop: true },
+				{ name: 'disharmony',     sound: 'assets/sound_fx_wheeze2.mp3', volume: 0.3,  loop: true }
+			],
+			{ x: -1, y: -1, z: 1.5 },
+			['tr1', 'tr2']);
 	}
 
 	update (inEvent) {
@@ -505,7 +525,12 @@ class SituationGuide extends Situation {
 				{ name: 'open',  from: 'opening', to: 'opened'  },
 				{ name: 'close', from: 'opened',  to: 'closing' },
 				{ name: 'close', from: 'closing', to: 'closed'  },
-			], ['tm1', 'tm2']);
+			], [
+				{ name: 'opening', sound: 'assets/sound_fx_book_open.wav',  volume: 1, loop: false },
+				{ name: 'closing', sound: 'assets/sound_fx_book_close.mp3', volume: 1, loop: false }
+			],
+			{ x: -1, y: 1, z: 1.5 },
+			['tm1', 'tm2']);
 
 		this.frame_el = Element.make('div', {
 			'class': 'magnified-frame',
@@ -573,5 +598,5 @@ class SituationGuide extends Situation {
  * Prevents problems with objects not loaded yet while trying to assign these.
  */
 window.addEventListener('pageshow', function () {
-	window.main = new MainLogic();
+	window.mainlogic = new MainLogic();
 }, false);
