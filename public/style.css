@@ -57,7 +57,7 @@ body {
 body.arena {
 	background: #000 url(assets/landscape_background.png) no-repeat;
 	height: 1200px;  /* Huge dimentions for the data arena screen */
-	width: 10080px;
+	width: 10480px;
 }
 
 body.mock {
@@ -87,7 +87,7 @@ body.mock {
 	width: 800px;
 	z-index: 1;
 	top: 200px;
-	left: 860px;
+	left: 910px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -120,7 +120,7 @@ body.mock {
 }
 
 .alien-shock {
-	left: 3380px;
+	left: 3530px;
 }
 .alien-shock.arrested {
 	background: url(assets/alien1_arrested.png) no-repeat center center;
@@ -136,7 +136,7 @@ body.mock {
 }
 
 .alien-breath {
-	left: 5900px;
+	left: 6150px;
 }
 .alien-breath.nobreath {
 	background: url(assets/alien2_nobreath.png) no-repeat center center;
@@ -152,7 +152,7 @@ body.mock {
 }
 
 .guide {
-	left: 8420px;
+	left: 8770px;
 }
 .guide.closed {
 	background: url(assets/guide_closed.png) no-repeat center center;

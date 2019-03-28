@@ -65,7 +65,7 @@ class Tracker {
 			'y' : 0,
 			'nx': 0, // normalised x position relative to arena [-1,1]
 			'ny': 0, // normalised y positive relative to arena [-1,1]
-			's' : 0, // s represents position relative to screen [0-10080)
+			's' : 0, // s represents position relative to screen [0-10480)
 			'r' : 0, // r represents radius from centre
 			'ap': 0  // angle in polar coordinates (radians)
 		},
@@ -130,7 +130,7 @@ class Tracker {
 			}
 			this.close_to_screen = (this.position.r > 0.59 && this.position.r < 1.02) ? 1 : 0;
 
-			this.position.s = Math.round(this.position.ap / (2*Math.PI) * 10080);
+			this.position.s = Math.round(this.position.ap / (2*Math.PI) * 10480);
 
 			this.pointed_at_screen = (this.position.r > 0.75 && this.position.r < 1.02) ? 1 : 0; // very rough approximation
 		}

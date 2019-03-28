@@ -394,8 +394,8 @@ class SituationAlienShock extends Situation {
 				{ name: 'arrest',  from: 'sparking',     to: 'halfsparking' },
 				{ name: 'arrest',  from: 'halfsparking', to: 'arrested'     }
 			], [
-				{ name: 'halfsparking', sound: 'assets/sound_fx_garbled_speech.mp3', volume: 0.9, loop: true },
-				{ name: 'sparking',     sound: 'assets/sound_fx_garbled_speech.mp3', volume: 0.9, loop: true },
+				{ name: 'halfsparking', sound: 'assets/sound_fx_garbled_speech.mp3', volume: 0.5, loop: true },
+				{ name: 'sparking',     sound: 'assets/sound_fx_garbled_speech.mp3', volume: 0.5, loop: true },
 				{ name: 'heartrate',    sound: 'assets/sound_fx_heartbeat.mp3',      volume: 0.7, loop: true }
 			],
 			{ x: 1, y: -1, z: 1.5 },
@@ -462,7 +462,7 @@ class SituationAlienBreath extends Situation {
 				{ name: 'deharmonised', from: 'halfdisharmony', to: 'nobreath'       }
 			], [
 				{ name: 'nobreath',       sound: 'assets/sound_fx_wheeze1.mp3', volume: 0.05, loop: true },
-				{ name: 'halfdisharmony', sound: 'assets/sound_fx_wheeze1.mp3', volume: 0.3,  loop: true },
+				{ name: 'halfdisharmony', sound: 'assets/sound_fx_wheeze1.mp3', volume: 0.2,  loop: true },
 				{ name: 'disharmony',     sound: 'assets/sound_fx_wheeze2.mp3', volume: 0.3,  loop: true }
 			],
 			{ x: -1, y: -1, z: 1.5 },
