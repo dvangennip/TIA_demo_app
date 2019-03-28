@@ -104,11 +104,11 @@ class MainLogic {
 		// initiate all tools
 		this.tools = {
 			'tw1': new Tool(1, 'tw1'),
-			'tw2': new Tool(2, 'tw2', 'assets/sound_fx_waterpump.mp3', ['is_moving']),
-			'ts1': new Tool(3, 'ts1', 'assets/sound_fx_electric.wav',  ['close_to_screen']),
-			'ts2': new Tool(4, 'ts2', 'assets/sound_fx_electric.wav',  ['close_to_screen']),
-			'tr1': new Tool(5, 'tr1', 'assets/sound_fx_rattle.wav',    ['is_moving']),
-			'tr2': new Tool(6, 'tr2', 'assets/sound_fx_rattle.wav',    ['is_moving']),
+			'tw2': new Tool(2, 'tw2', 'assets/sound_fx_waterpump.mp3', ['is_moving'], 1),
+			'ts1': new Tool(3, 'ts1', 'assets/sound_fx_electric.wav',  ['close_to_screen'], 0.15),
+			'ts2': new Tool(4, 'ts2', 'assets/sound_fx_electric.wav',  ['close_to_screen'], 0.15),
+			'tr1': new Tool(5, 'tr1'),
+			'tr2': new Tool(6, 'tr2'),
 			'tm1': new Tool(7, 'tm1'),
 			'tm2': new Tool(8, 'tm2')
 		}
@@ -143,7 +143,7 @@ class MainLogic {
 }
 
 class Tool {
-	constructor (inID, inName, inSound, inSoundConditions) {
+	constructor (inID, inName, inSound, inSoundConditions, inSoundVolume) {
 		this.toolID            = (inID) ? inID : 0;
 		this.toolName          = inName;
 		this.pos               = 0;
@@ -160,7 +160,7 @@ class Tool {
 			this.sound = new Howl({
 				src: inSound,
 				loop: true,
-				volume: 1
+				volume: inSoundVolume
 			});
 
 			this.soundConditions = inSoundConditions;
@@ -251,20 +251,18 @@ class Environment {
 		Howler.pos(0, 0, 1.5); // x,y,z
 
 		// setup ambient audio
-		if (!debug) {
-			this.ambientAudio = Element.make('audio', {
-				'id': 'environment-audio',
-				'autoplay': true,
-				'loop': true
-			})
-			this.ambientSource = Element.make('source', {
-				'src': 'assets/sound_ambient.mp3',
-				'type': 'audio/wave'
-			})
-			this.ambientAudio.appendChild(this.ambientSource);
-			document.getElementsByTagName('body')[0].appendChild(this.ambientAudio);
-			this.ambientAudio.load();
-		}
+		this.ambientAudio = Element.make('audio', {
+			'id': 'environment-audio',
+			'autoplay': true,
+			'loop': true
+		})
+		this.ambientSource = Element.make('source', {
+			'src': 'assets/sound_ambient.mp3',
+			'type': 'audio/wave'
+		})
+		this.ambientAudio.appendChild(this.ambientSource);
+		document.getElementsByTagName('body')[0].appendChild(this.ambientAudio);
+		this.ambientAudio.load();
 	}
 }
 
